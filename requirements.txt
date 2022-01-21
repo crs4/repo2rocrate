@@ -1,0 +1,2 @@
+snakemake==6.13.1
+rocrate==0.5.3
