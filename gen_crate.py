@@ -16,6 +16,7 @@
 Generate a Workflow RO-Crate for a "best practices" Snakemake workflow.
 
 https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility
+https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#uploading-workflows-to-workflowhub
 https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
@@ -30,7 +31,10 @@ from snakemake.workflow import Workflow
 
 GH_API_URL = "https://api.github.com"
 WF_BASENAME = "Snakefile"
+# "standard" resources will be included if present
 STANDARD_DIRS = {
+    ".tests/integration": "Integration tests for the workflow",
+    ".tests/unit": "Unit tests for the workflow",
     "workflow": "Workflow folder",
     "config": "Configuration folder",
     "results": "Output files",
@@ -41,6 +45,13 @@ STANDARD_DIRS = {
     "workflow/notebooks": "Notebooks folder",
     "workflow/report": "Report caption files",
 }
+STANDARD_TOP_LEVEL_FILES = {
+    "README", "README.md",
+    "LICENSE", "LICENSE.md",
+    "CODE_OF_CONDUCT", "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING", "CONTRIBUTING.md",
+}
+STANDARD_DIAGRAM = "images/rulegraph.svg"
 
 
 def find_workflow(root_dir):
@@ -90,8 +101,8 @@ def make_crate(args):
     # Is there a Python equivalent of https://github.com/licensee/licensee?
     if args.license:
         crate.root_dataset["license"] = args.license
-    for name in "README", "README.md", "LICENSE", "LICENSE.md":
-        source = Path(args.root) / name
+    for name in STANDARD_TOP_LEVEL_FILES:
+        source = args.root / name
         if source.is_file():
             crate.add_file(source, name)
     if args.repo_url:
@@ -111,11 +122,22 @@ def make_crate(args):
         crate.add_dataset(source, relpath, properties={
             "description": desc,
         })
+        if relpath.startswith(".tests"):
+            # non-flat arbitrary structure, treat them as opaque
+            # note: contents will still be added to the crate
+            continue
         for entry in os.scandir(source):
             if entry.is_file():
                 f_source = Path(entry.path)
                 if not f_source.samefile(wf_source):
                     crate.add_file(f_source, f_source.relative_to(args.root))
+    diag_source = args.root / STANDARD_DIAGRAM
+    if diag_source.is_file():
+        diag = crate.add_file(diag_source, STANDARD_DIAGRAM, properties={
+            "name": "Workflow diagram",
+            "@type": ["File", "ImageObject"],
+        })
+        workflow["image"] = diag
     if args.output.endswith(".zip"):
         crate.write_zip(args.output)
     else:
