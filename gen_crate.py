@@ -44,6 +44,7 @@ STANDARD_DIRS = {
     "workflow/scripts": "Scripts folder",
     "workflow/notebooks": "Notebooks folder",
     "workflow/report": "Report caption files",
+    "workflow/schemas": "Validation files",
 }
 STANDARD_TOP_LEVEL_FILES = {
     "README", "README.md",
