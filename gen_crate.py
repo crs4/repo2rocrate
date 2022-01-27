@@ -14,6 +14,9 @@
 
 """\
 Generate a Workflow RO-Crate for a "best practices" Snakemake workflow.
+
+https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility
+https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
 import argparse
@@ -141,6 +144,9 @@ if __name__ == "__main__":
     parser.add_argument("--lang-version", metavar="STRING",
                         help="Snakemake version required by the workflow")
     parser.add_argument("--license", metavar="STRING", help="license URL")
-    parser.add_argument("--ci-workflow", metavar="STRING",
-                        help="GitHub workflow name", default="main.yml")
+    parser.add_argument(
+        "--ci-workflow", metavar="STRING", default="main.yml",
+        help=("filename (basename) of the GitHub Actions workflow "
+              "that runs the tests for the Snakemake workflow")
+    )
     main(parser.parse_args())
