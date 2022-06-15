@@ -1,0 +1,17 @@
+recipient_key: ./test.pub
+repository:
+  path: ../fake-repo
+  private_key: repo.sec
+  public_key: repo.pub
+destination:
+  type: "S3"
+  root_path: "test-bucket/path/"
+  connection:  # all elements will be passed to the selected snakemake remote provider
+    access_key_id: "crc-user"
+    secret_access_key: "crc-user-s3cr3t"
+    host: http://localhost:9000
+    verify: false # don't verify ssl certificates
+sources:
+  glob_extension: ".tiff.c4gh"
+  items:
+  - test-file.txt.c4gh
