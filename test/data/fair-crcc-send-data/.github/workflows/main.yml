@@ -1,0 +1,88 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  #Linting:
+  #  runs-on: ubuntu-latest
+  #  # The linter erroneously picks up something as an error, so we ignore its failure
+  #  continue-on-error: true
+  #  steps:
+  #    - uses: actions/checkout@v2
+  #    - name: Lint workflow
+  #      uses: snakemake/snakemake-github-action@v1.24.0
+  #      with:
+  #        directory: .tests/integration/test-1
+  #        snakefile: workflow/Snakefile
+  #        args: "--configfile .tests/integration/test-1/config.yml --lint"
+
+  Testing:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        snakemake-version: ["6.12.3"]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install singularity
+        run: |
+          curl --output /tmp/singularity-ce.deb --location \
+              https://github.com/sylabs/singularity/releases/download/v3.9.4/singularity-ce_3.9.4-focal_amd64.deb && \
+          sudo apt update -y && \
+          sudo apt install -y /tmp/singularity-ce.deb
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: "3.10"
+          mamba-version: "*"
+          channels: bioconda,conda-forge,defaults
+          channel-priority: true
+          miniforge-variant: "Mambaforge"
+          miniforge-version: "4.11.0-0"
+          use-mamba: true
+
+      - name: start minio
+        run: docker-compose -f .tests/integration/docker-compose.yml up -d
+
+      - name: wait for minio
+        run: |
+          for i in {1..10}; do
+            if curl -f http://localhost:9000/minio/health/live ; then
+              echo "Minio seems ok!"
+              break
+            else
+              echo "Minio isn't answering yet"
+            fi
+            sleep 5
+          done
+
+      - name: mamba install dependencies
+        shell: bash -l {0}
+        run: |
+          mamba install \
+            snakemake-minimal==${{ matrix.snakemake-version }} \
+            networkx pygraphviz boto3
+
+      - name: pip install Python dependencies
+        shell: bash -l {0}
+        run: pip install crypt4gh
+
+      # must run snakemake "manually" (rather than through the action) to allow
+      # it to see minio on localhost and to work properly with singularity
+      - name: Run workflow
+        shell: bash -l {0}
+        run: |
+          snakemake --directory .tests/integration/test-1 \
+                    --configfile .tests/integration/test-1/config.yml \
+                    --snakefile workflow/Snakefile \
+                    --use-singularity --verbose --cores
+
+      - name: Validate output
+        shell: bash -l {0}
+        run: |
+          cd .tests/integration/test-1 && \
+          python validate.py

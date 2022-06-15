@@ -1,0 +1,34 @@
+# Main entrypoint of the workflow.
+
+##### set minimum snakemake version #####
+from snakemake.utils import min_version
+
+min_version("6.5.0")
+
+# Run as:
+# snakemake --snakefile ./Snakefile --profile ./profile --configfile request_123_config.yml --use-singularity --cores
+#
+
+
+container: "docker://ilveroluca/crypt4gh:1.5"
+
+
+##### Load rules #####
+include: "rules/common.smk"
+include: "rules/index.smk"
+include: "rules/encryption.smk"
+include: "rules/upload.smk"
+
+
+##### Glob input ####
+
+source_files = glob_source_paths()
+
+
+###### Main target rule ##########
+
+
+rule all:
+    input:
+        index=get_remote("index.tsv.c4gh"),
+        data=lambda _: [get_remote(fname) for fname in get_all_new_item_names()],

@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - settings.conf
+    environment:
+      #- MINIO_BROWSER=off
+      - MINIO_HTTP_TRACE=/dev/stderr
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - "mkdir -p /data/$${STORAGE_BUCKET} && exec /usr/bin/docker-entrypoint.sh minio server --console-address :9001 /data"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

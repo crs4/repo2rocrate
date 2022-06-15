@@ -1,0 +1,19 @@
+# example workflow configuration
+recipient_key: ./recipient_key
+repository:
+  path: "/mnt/rbd/data/sftp/fair-crcc/"
+  private_key: bbmri-key
+  public_key: bbmri-key.pub
+sources:
+  glob_extension: ".tiff.c4gh"
+  items:
+  - some/directory/to/glob
+  - another/individual/file.tiff.c4gh
+destination:
+  type: "S3"
+  root_path: "my-bucket/prefix/"
+  connection:  # all elements will be passed to the selected snakemake remote provider
+    access_key_id: "MYACCESSKEY"
+    secret_access_key: "MYSECRET"
+    host: http://localhost:9000
+    verify: false # don't verify ssl certificates
