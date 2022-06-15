@@ -31,6 +31,7 @@ from snakemake.workflow import Workflow
 
 GH_API_URL = "https://api.github.com"
 WF_BASENAME = "Snakefile"
+CI_WORKFLOW = "main.yml"
 # "standard" resources will be included if present
 STANDARD_DIRS = {
     ".tests/integration": "Integration tests for the workflow",
@@ -88,36 +89,37 @@ def get_ci_resource(repo_url, ci_wf_name):
     return f"repos/{owner}/{repo_name}/actions/workflows/{ci_wf_name}"
 
 
-def make_crate(args):
+def make_crate(root, repo_url=None, version=None, lang_version=None,
+               license=None, ci_workflow=CI_WORKFLOW):
     crate = ROCrate(gen_preview=False)
-    wf_source = find_workflow(args.root)
+    wf_source = find_workflow(root)
     workflow = crate.add_workflow(
-        wf_source, wf_source.relative_to(args.root), main=True,
-        lang="snakemake", lang_version=args.lang_version, gen_cwl=False
+        wf_source, wf_source.relative_to(root), main=True,
+        lang="snakemake", lang_version=lang_version, gen_cwl=False
     )
     # wf_obj = parse_workflow(wf_source)
-    workflow["name"] = crate.root_dataset["name"] = args.root.name
-    if args.version:
-        workflow["version"] = args.version
+    workflow["name"] = crate.root_dataset["name"] = root.name
+    if version:
+        workflow["version"] = version
     # Is there a Python equivalent of https://github.com/licensee/licensee?
-    if args.license:
-        crate.root_dataset["license"] = args.license
+    if license:
+        crate.root_dataset["license"] = license
     for name in STANDARD_TOP_LEVEL_FILES:
-        source = args.root / name
+        source = root / name
         if source.is_file():
             crate.add_file(source, name)
-    if args.repo_url:
-        workflow["url"] = crate.root_dataset["isBasedOn"] = args.repo_url
-        ci_wf_source = args.root / ".github" / "workflows" / args.ci_workflow
+    if repo_url:
+        workflow["url"] = crate.root_dataset["isBasedOn"] = repo_url
+        ci_wf_source = root / ".github" / "workflows" / ci_workflow
         if ci_wf_source.is_file():
-            suite = crate.add_test_suite(name=f"{args.root.name} test suite")
-            resource = get_ci_resource(args.repo_url, args.ci_workflow)
+            suite = crate.add_test_suite(name=f"{root.name} test suite")
+            resource = get_ci_resource(repo_url, ci_workflow)
             crate.add_test_instance(
                 suite, GH_API_URL, resource=resource, service="github",
-                name=f"GitHub testing workflow for {args.root.name}"
+                name=f"GitHub testing workflow for {root.name}"
             )
     for relpath, desc in STANDARD_DIRS.items():
-        source = args.root / relpath
+        source = root / relpath
         if not source.is_dir():
             continue
         crate.add_dataset(source, relpath, properties={
@@ -131,26 +133,30 @@ def make_crate(args):
             if entry.is_file():
                 f_source = Path(entry.path)
                 if not f_source.samefile(wf_source):
-                    crate.add_file(f_source, f_source.relative_to(args.root))
-    diag_source = args.root / STANDARD_DIAGRAM
+                    crate.add_file(f_source, f_source.relative_to(root))
+    diag_source = root / STANDARD_DIAGRAM
     if diag_source.is_file():
         diag = crate.add_file(diag_source, STANDARD_DIAGRAM, properties={
             "name": "Workflow diagram",
             "@type": ["File", "ImageObject"],
         })
         workflow["image"] = diag
-    if args.output.endswith(".zip"):
-        crate.write_zip(args.output)
-    else:
-        crate.write(args.output)
+    return crate
 
 
 def main(args):
     args.root = Path(args.root)
     if not args.output:
         args.output = f"{args.root.name}.crate.zip"
+    args.output = Path(args.output)
     print(f"generating {args.output}")
-    make_crate(args)
+    crate = make_crate(args.root, repo_url=args.repo_url, version=args.version,
+                       lang_version=args.lang_version, license=args.license,
+                       ci_workflow=args.ci_workflow)
+    if args.output.suffix == ".zip":
+        crate.write_zip(args.output)
+    else:
+        crate.write(args.output)
 
 
 if __name__ == "__main__":
@@ -168,7 +174,7 @@ if __name__ == "__main__":
                         help="Snakemake version required by the workflow")
     parser.add_argument("--license", metavar="STRING", help="license URL")
     parser.add_argument(
-        "--ci-workflow", metavar="STRING", default="main.yml",
+        "--ci-workflow", metavar="STRING", default=CI_WORKFLOW,
         help=("filename (basename) of the GitHub Actions workflow "
               "that runs the tests for the Snakemake workflow")
     )

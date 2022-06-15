@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gen_crate import make_crate
+from gen_crate import main
 from rocrate.rocrate import ROCrate
 
 
@@ -25,16 +25,15 @@ class Args:
 
 def test_fair_crcc_send_data(data_dir, tmpdir):
     repo_name = "fair-crcc-send-data"
-    out_dir = tmpdir / f"{repo_name}-crate"
     args = Args()
     args.root = data_dir / repo_name
-    args.output = str(out_dir)
+    args.output = tmpdir / f"{repo_name}-crate"
     args.repo_url = f"https://github.com/crs4/{repo_name}"
     args.version = "0.1"  # made up
     args.lang_version = "6.5.0"
     args.license = "GPL-3.0"
     args.ci_workflow = "main.yml"
-    make_crate(args)
+    main(args)
     crate = ROCrate(args.output)
     assert crate.root_dataset["license"] == args.license
     # workflow
@@ -80,10 +79,10 @@ def test_fair_crcc_send_data(data_dir, tmpdir):
         "workflow/scripts/gen_rename_index.py",
     ]
     for relpath in exp_files:
-        assert (out_dir / relpath).is_file()
+        assert (args.output / relpath).is_file()
         entity = crate.get(relpath)
         assert entity.type == "File"
     for relpath in [".tests/integration"]:
-        assert (out_dir / relpath).is_dir()
+        assert (args.output / relpath).is_dir()
         entity = crate.get(relpath)
         assert entity.type == "Dataset"
