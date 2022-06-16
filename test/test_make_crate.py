@@ -12,43 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from gen_crate import main
-from rocrate.rocrate import ROCrate
+from repo2rocrate.snakemake import make_crate
 
 
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
 
 
-class Args:
-    pass
-
-
 def test_fair_crcc_send_data(data_dir, tmpdir):
     repo_name = "fair-crcc-send-data"
-    args = Args()
-    args.root = data_dir / repo_name
-    args.output = tmpdir / f"{repo_name}-crate"
-    args.repo_url = f"https://github.com/crs4/{repo_name}"
-    args.version = "0.1"  # made up
-    args.lang_version = "6.5.0"
-    args.license = "GPL-3.0"
-    args.ci_workflow = "main.yml"
-    main(args)
-    crate = ROCrate(args.output)
-    assert crate.root_dataset["license"] == args.license
+    root = data_dir / repo_name
+    repo_url = f"https://github.com/crs4/{repo_name}"
+    version = "0.1"  # made up
+    lang_version = "6.5.0"
+    license = "GPL-3.0"
+    ci_workflow = "main.yml"
+    crate = make_crate(root, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow)
+    assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
     assert workflow["name"] == repo_name
-    assert workflow["version"] == args.version
+    assert workflow["version"] == version
     image = crate.get("images/rulegraph.svg")
     assert image
     assert set(image.type) == {"File", "ImageObject"}
     assert workflow["image"] is image
     language = workflow["programmingLanguage"]
     assert language.id == SNAKEMAKE_ID
-    assert language["version"] == args.lang_version
-    assert workflow["url"] == crate.root_dataset["isBasedOn"] == args.repo_url
+    assert language["version"] == lang_version
+    assert workflow["url"] == crate.root_dataset["isBasedOn"] == repo_url
     # workflow testing metadata
     suite = crate.root_dataset["mentions"]
     assert suite
@@ -64,7 +56,7 @@ def test_fair_crcc_send_data(data_dir, tmpdir):
         instance = instance[0]
     assert instance.type == "TestInstance"
     assert instance["url"] == "https://api.github.com"
-    assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{args.ci_workflow}"
+    assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
     # layout
     exp_files = [
         "LICENSE",
@@ -79,10 +71,8 @@ def test_fair_crcc_send_data(data_dir, tmpdir):
         "workflow/scripts/gen_rename_index.py",
     ]
     for relpath in exp_files:
-        assert (args.output / relpath).is_file()
         entity = crate.get(relpath)
         assert entity.type == "File"
     for relpath in [".tests/integration"]:
-        assert (args.output / relpath).is_dir()
         entity = crate.get(relpath)
         assert entity.type == "Dataset"

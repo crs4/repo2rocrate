@@ -13,25 +13,23 @@
 # under the License.
 
 """\
-Generate a Workflow RO-Crate for a "best practices" Snakemake workflow.
+Generate a Workflow Testing RO-Crate from a "best practices" Snakemake
+workflow repository.
 
-https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility
-https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#uploading-workflows-to-workflowhub
+https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
-import argparse
 import os
 from pathlib import Path, PurePosixPath
 from urllib.parse import unquote, urlparse
 
 from rocrate.rocrate import ROCrate
 from snakemake.workflow import Workflow
+from . import CI_WORKFLOW, GH_API_URL
 
 
-GH_API_URL = "https://api.github.com"
 WF_BASENAME = "Snakefile"
-CI_WORKFLOW = "main.yml"
 # "standard" resources will be included if present
 STANDARD_DIRS = {
     ".tests/integration": "Integration tests for the workflow",
@@ -142,40 +140,3 @@ def make_crate(root, repo_url=None, version=None, lang_version=None,
         })
         workflow["image"] = diag
     return crate
-
-
-def main(args):
-    args.root = Path(args.root)
-    if not args.output:
-        args.output = f"{args.root.name}.crate.zip"
-    args.output = Path(args.output)
-    print(f"generating {args.output}")
-    crate = make_crate(args.root, repo_url=args.repo_url, version=args.version,
-                       lang_version=args.lang_version, license=args.license,
-                       ci_workflow=args.ci_workflow)
-    if args.output.suffix == ".zip":
-        crate.write_zip(args.output)
-    else:
-        crate.write(args.output)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
-    )
-    parser.add_argument("root", metavar="ROOT_DIR",
-                        help="top-level directory (workflow repository)")
-    parser.add_argument("-o", "--output", metavar="DIR OR ZIP",
-                        help="output RO-Crate directory or zip file")
-    parser.add_argument("--repo-url", metavar="STRING",
-                        help="workflow repository URL")
-    parser.add_argument("--version", metavar="STRING", help="workflow version")
-    parser.add_argument("--lang-version", metavar="STRING",
-                        help="Snakemake version required by the workflow")
-    parser.add_argument("--license", metavar="STRING", help="license URL")
-    parser.add_argument(
-        "--ci-workflow", metavar="STRING", default=CI_WORKFLOW,
-        help=("filename (basename) of the GitHub Actions workflow "
-              "that runs the tests for the Snakemake workflow")
-    )
-    main(parser.parse_args())

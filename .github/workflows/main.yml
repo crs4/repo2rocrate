@@ -21,10 +21,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install requirements
+    - name: Install
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
+        pip install .
     - name: Lint
       run: |
         pip install flake8
@@ -32,4 +33,4 @@ jobs:
     - name: Test
       run: |
         pip install pytest
-        PYTHONPATH=$PWD pytest -sv test
+        pytest -sv test
