@@ -18,7 +18,7 @@ from repo2rocrate.snakemake import make_crate
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
 
 
-def test_fair_crcc_send_data(data_dir, tmpdir):
+def test_fair_crcc_send_data(data_dir):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
     repo_url = f"https://github.com/crs4/{repo_name}"
