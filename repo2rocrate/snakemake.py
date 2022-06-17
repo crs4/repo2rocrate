@@ -78,7 +78,11 @@ def parse_workflow(workflow_path):
 
 
 def make_crate(root, repo_url=None, version=None, lang_version=None,
-               license=None, ci_workflow=CI_WORKFLOW):
+               license=None, ci_workflow=None, diagram=None):
+    if ci_workflow is None:
+        ci_workflow = CI_WORKFLOW
+    if diagram is None:
+        diagram = STANDARD_DIAGRAM
     crate = ROCrate(gen_preview=False)
     wf_source = find_workflow(root)
     workflow = crate.add_workflow(
@@ -122,9 +126,9 @@ def make_crate(root, repo_url=None, version=None, lang_version=None,
                 f_source = Path(entry.path)
                 if not f_source.samefile(wf_source):
                     crate.add_file(f_source, f_source.relative_to(root))
-    diag_source = root / STANDARD_DIAGRAM
+    diag_source = root / diagram
     if diag_source.is_file():
-        diag = crate.add_file(diag_source, STANDARD_DIAGRAM, properties={
+        diag = crate.add_file(diag_source, diagram, properties={
             "name": "Workflow diagram",
             "@type": ["File", "ImageObject"],
         })
