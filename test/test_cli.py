@@ -38,6 +38,10 @@ def test_default(data_dir, tmpdir, monkeypatch):
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
     assert workflow["name"] == repo_name
+    image = crate.get("images/rulegraph.svg")
+    assert image
+    assert set(image.type) == {"File", "ImageObject"}
+    assert workflow["image"] is image
     exp_files = [
         "LICENSE",
         "README.md",
@@ -69,6 +73,7 @@ def test_options(data_dir, tmpdir):
     lang_version = "9.9.0"
     license = "http://example.org/license"
     ci_workflow = "conventional-prs.yml"
+    diagram = "images/rulegraph.dot"
     runner = CliRunner()
     result = runner.invoke(cli, [
         "-r", str(root),
@@ -79,6 +84,7 @@ def test_options(data_dir, tmpdir):
         "--lang-version", lang_version,
         "--license", license,
         "--ci-workflow", ci_workflow,
+        "--diagram", diagram,
     ])
     assert result.exit_code == 0
     assert crate_dir.is_dir()
@@ -86,6 +92,10 @@ def test_options(data_dir, tmpdir):
     workflow = crate.mainEntity
     assert workflow["name"] == repo_name
     assert workflow["version"] == version
+    image = crate.get(diagram)
+    assert image
+    assert set(image.type) == {"File", "ImageObject"}
+    assert workflow["image"] is image
     language = workflow["programmingLanguage"]
     assert language.id == SNAKEMAKE_ID
     assert language["version"] == lang_version
