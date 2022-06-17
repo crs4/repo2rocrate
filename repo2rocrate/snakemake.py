@@ -21,12 +21,12 @@ https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
 import os
-from pathlib import Path, PurePosixPath
-from urllib.parse import unquote, urlparse
+from pathlib import Path
 
 from rocrate.rocrate import ROCrate
 from snakemake.workflow import Workflow
 from . import CI_WORKFLOW, GH_API_URL
+from .utils import get_ci_wf_endpoint
 
 
 WF_BASENAME = "Snakefile"
@@ -77,16 +77,6 @@ def parse_workflow(workflow_path):
     return wf
 
 
-def get_ci_resource(repo_url, ci_wf_name):
-    repo_path = PurePosixPath(urlparse(unquote(repo_url)).path)
-    if len(repo_path.parts) != 3:  # first one is '/'
-        raise RuntimeError(
-            "repository url must be like https://github.com/<OWNER>/<REPO>"
-        )
-    owner, repo_name = repo_path.parts[-2:]
-    return f"repos/{owner}/{repo_name}/actions/workflows/{ci_wf_name}"
-
-
 def make_crate(root, repo_url=None, version=None, lang_version=None,
                license=None, ci_workflow=CI_WORKFLOW):
     crate = ROCrate(gen_preview=False)
@@ -111,7 +101,7 @@ def make_crate(root, repo_url=None, version=None, lang_version=None,
         ci_wf_source = root / ".github" / "workflows" / ci_workflow
         if ci_wf_source.is_file():
             suite = crate.add_test_suite(name=f"{root.name} test suite")
-            resource = get_ci_resource(repo_url, ci_workflow)
+            resource = get_ci_wf_endpoint(repo_url, ci_workflow)
             crate.add_test_instance(
                 suite, GH_API_URL, resource=resource, service="github",
                 name=f"GitHub testing workflow for {root.name}"
