@@ -20,35 +20,11 @@ https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
-from rocrate.rocrate import ROCrate
 from snakemake.workflow import Workflow
-from . import CI_WORKFLOW, GH_API_URL
-from .utils import get_ci_wf_endpoint
+from .common import CrateBuilder
 
 
 WF_BASENAME = "Snakefile"
-# "standard" resources will be included if present
-STANDARD_DIRS = {
-    ".tests/integration": "Integration tests for the workflow",
-    ".tests/unit": "Unit tests for the workflow",
-    "workflow": "Workflow folder",
-    "config": "Configuration folder",
-    "results": "Output files",
-    "resources": "Retrieved resources",
-    "workflow/rules": "Workflow rule module",
-    "workflow/envs": "Conda environments",
-    "workflow/scripts": "Scripts folder",
-    "workflow/notebooks": "Notebooks folder",
-    "workflow/report": "Report caption files",
-    "workflow/schemas": "Validation files",
-}
-STANDARD_TOP_LEVEL_FILES = {
-    "README", "README.md",
-    "LICENSE", "LICENSE.md",
-    "CODE_OF_CONDUCT", "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING", "CONTRIBUTING.md",
-}
-STANDARD_DIAGRAM = "images/rulegraph.svg"
 
 
 def find_workflow(root_dir):
@@ -74,51 +50,34 @@ def parse_workflow(workflow_path):
     return wf
 
 
+class SnakemakeCrateBuilder(CrateBuilder):
+
+    DATA_ENTITIES = [
+        (".tests/integration", "Dataset", "Integration tests for the workflow"),
+        (".tests/unit", "Dataset", "Unit tests for the workflow"),
+        ("workflow", "Dataset", "Workflow folder"),
+        ("config", "Dataset", "Configuration folder"),
+        ("results", "Dataset", "Output files"),
+        ("resources", "Dataset", "Retrieved resources"),
+        ("workflow/rules", "Dataset", "Workflow rule module"),
+        ("workflow/envs", "Dataset", "Conda environments"),
+        ("workflow/scripts", "Dataset", "Scripts folder"),
+        ("workflow/notebooks", "Dataset", "Notebooks folder"),
+        ("workflow/report", "Dataset", "Report caption files"),
+        ("workflow/schemas", "Dataset", "Validation files"),
+    ]
+    for s in "README", "LICENSE", "CODE_OF_CONDUCT", "CONTRIBUTING":
+        for ext in "", ".md":
+            DATA_ENTITIES.append((s + ext, "File", ""))
+    DIAGRAM = "images/rulegraph.svg"
+
+    @property
+    def lang(self):
+        return "snakemake"
+
+
 def make_crate(root, repo_url=None, version=None, lang_version=None,
                license=None, ci_workflow=None, diagram=None):
-    if ci_workflow is None:
-        ci_workflow = CI_WORKFLOW
-    if diagram is None:
-        diagram = STANDARD_DIAGRAM
-    crate = ROCrate(gen_preview=False)
+    builder = SnakemakeCrateBuilder(root, repo_url=repo_url)
     wf_source = find_workflow(root)
-    workflow = crate.add_workflow(
-        wf_source, wf_source.relative_to(root), main=True,
-        lang="snakemake", lang_version=lang_version, gen_cwl=False
-    )
-    # wf_obj = parse_workflow(wf_source)
-    workflow["name"] = crate.root_dataset["name"] = root.name
-    if version:
-        workflow["version"] = version
-    # Is there a Python equivalent of https://github.com/licensee/licensee?
-    if license:
-        crate.root_dataset["license"] = license
-    for name in STANDARD_TOP_LEVEL_FILES:
-        source = root / name
-        if source.is_file():
-            crate.add_file(source, name)
-    if repo_url:
-        workflow["url"] = crate.root_dataset["isBasedOn"] = repo_url
-        ci_wf_source = root / ".github" / "workflows" / ci_workflow
-        if ci_wf_source.is_file():
-            suite = crate.add_test_suite(name=f"{root.name} test suite")
-            resource = get_ci_wf_endpoint(repo_url, ci_workflow)
-            crate.add_test_instance(
-                suite, GH_API_URL, resource=resource, service="github",
-                name=f"GitHub testing workflow for {root.name}"
-            )
-    for relpath, desc in STANDARD_DIRS.items():
-        source = root / relpath
-        if not source.is_dir():
-            continue
-        crate.add_dataset(source, relpath, properties={
-            "description": desc,
-        })
-    diag_source = root / diagram
-    if diag_source.is_file():
-        diag = crate.add_file(diag_source, diagram, properties={
-            "name": "Workflow diagram",
-            "@type": ["File", "ImageObject"],
-        })
-        workflow["image"] = diag
-    return crate
+    return builder.build(wf_source, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
