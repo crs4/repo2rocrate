@@ -15,7 +15,6 @@
 from pathlib import Path
 
 import click
-from . import CI_WORKFLOW
 from .nextflow import make_crate as nextflow_make_crate
 from .snakemake import make_crate as snakemake_make_crate
 
@@ -34,7 +33,7 @@ DEFAULT_LANG = "snakemake"
 @click.option("--version", help="workflow version")
 @click.option("--lang-version", help="workflow language version")
 @click.option("--license", help="license URL")
-@click.option("--ci-workflow", help="filename (basename) of the GitHub Actions workflow that runs the tests for the workflow", default=CI_WORKFLOW)
+@click.option("--ci-workflow", help="filename (basename) of the GitHub Actions workflow that runs the tests for the workflow")
 @click.option("--diagram", help="relative path of the workflow diagram")
 def cli(root, lang, output, repo_url, version, lang_version, license, ci_workflow, diagram):
     if not output:

@@ -12,5 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-CI_WORKFLOW = "main.yml"
-GH_API_URL = "https://api.github.com"
+from .version import VERSION
+
+__version__ = VERSION

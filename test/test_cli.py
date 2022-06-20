@@ -42,26 +42,24 @@ def test_default(data_dir, tmpdir, monkeypatch):
     assert image
     assert set(image.type) == {"File", "ImageObject"}
     assert workflow["image"] is image
-    exp_files = [
-        "LICENSE",
-        "README.md",
-        "config/example_config.yml",
-        "workflow/rules/common.smk",
-        "workflow/rules/encryption.smk",
-        "workflow/rules/index.smk",
-        "workflow/rules/upload.smk",
-        "workflow/schemas/config.schema.yml",
-        "workflow/scripts/gen_final_index.py",
-        "workflow/scripts/gen_rename_index.py",
+    expected_data_entities = [
+        ("LICENSE", "File"),
+        ("README.md", "File"),
+        ("config", "Dataset"),
+        (".tests/integration", "Dataset"),
+        ("workflow/rules", "Dataset"),
+        ("workflow/schemas", "Dataset"),
+        ("workflow/scripts", "Dataset"),
     ]
-    for relpath in exp_files:
-        assert (crate_dir / relpath).is_file()
+    for relpath, type_ in expected_data_entities:
         entity = crate.get(relpath)
-        assert entity.type == "File"
-    for relpath in [".tests/integration"]:
-        assert (crate_dir / relpath).is_dir()
-        entity = crate.get(relpath)
-        assert entity.type == "Dataset"
+        assert entity, f"{relpath} not listed in crate metadata"
+        assert entity.type == type_
+        p = crate_dir / relpath
+        assert p.is_file() if type_ == "File" else p.is_dir()
+    unlisted = crate_dir / "workflow/rules/common.smk"
+    assert not crate.get(str(unlisted))
+    assert unlisted.is_file()
 
 
 def test_options(data_dir, tmpdir):
