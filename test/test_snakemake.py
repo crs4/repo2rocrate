@@ -58,21 +58,16 @@ def test_fair_crcc_send_data(data_dir):
     assert instance["url"] == "https://api.github.com"
     assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
     # layout
-    exp_files = [
-        "LICENSE",
-        "README.md",
-        "config/example_config.yml",
-        "workflow/rules/common.smk",
-        "workflow/rules/encryption.smk",
-        "workflow/rules/index.smk",
-        "workflow/rules/upload.smk",
-        "workflow/schemas/config.schema.yml",
-        "workflow/scripts/gen_final_index.py",
-        "workflow/scripts/gen_rename_index.py",
+    expected_data_entities = [
+        ("LICENSE", "File"),
+        ("README.md", "File"),
+        ("config", "Dataset"),
+        (".tests/integration", "Dataset"),
+        ("workflow/rules", "Dataset"),
+        ("workflow/schemas", "Dataset"),
+        ("workflow/scripts", "Dataset"),
     ]
-    for relpath in exp_files:
+    for relpath, type_ in expected_data_entities:
         entity = crate.get(relpath)
-        assert entity.type == "File"
-    for relpath in [".tests/integration"]:
-        entity = crate.get(relpath)
-        assert entity.type == "Dataset"
+        assert entity, f"{relpath} not listed in crate metadata"
+        assert entity.type == type_

@@ -20,9 +20,6 @@ https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
-import os
-from pathlib import Path
-
 from rocrate.rocrate import ROCrate
 from snakemake.workflow import Workflow
 from . import CI_WORKFLOW, GH_API_URL
@@ -117,15 +114,6 @@ def make_crate(root, repo_url=None, version=None, lang_version=None,
         crate.add_dataset(source, relpath, properties={
             "description": desc,
         })
-        if relpath.startswith(".tests"):
-            # non-flat arbitrary structure, treat them as opaque
-            # note: contents will still be added to the crate
-            continue
-        for entry in os.scandir(source):
-            if entry.is_file():
-                f_source = Path(entry.path)
-                if not f_source.samefile(wf_source):
-                    crate.add_file(f_source, f_source.relative_to(root))
     diag_source = root / diagram
     if diag_source.is_file():
         diag = crate.add_file(diag_source, diagram, properties={
