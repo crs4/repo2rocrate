@@ -14,6 +14,7 @@
 
 import shutil
 
+import pytest
 from click.testing import CliRunner
 from repo2rocrate.cli import cli
 from rocrate.rocrate import ROCrate
@@ -22,18 +23,22 @@ from rocrate.rocrate import ROCrate
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
 
 
-def test_default(data_dir, tmpdir, monkeypatch):
+@pytest.mark.parametrize("to_zip", [False, True])
+def test_default(data_dir, tmpdir, monkeypatch, to_zip):
     repo_name = "fair-crcc-send-data"
     root = tmpdir / repo_name
+    crate_zip = tmpdir / f"{repo_name}.crate.zip"
     shutil.copytree(data_dir / repo_name, root)
     monkeypatch.chdir(root)
     runner = CliRunner()
-    result = runner.invoke(cli, [])
+    result = runner.invoke(cli, ["-o", crate_zip] if to_zip else [])
     assert result.exit_code == 0
-    crate_zip = root / f"{repo_name}.crate.zip"
-    assert (crate_zip).is_file()
-    crate_dir = tmpdir / f"{repo_name}-crate"
-    shutil.unpack_archive(crate_zip, crate_dir)
+    if to_zip:
+        assert crate_zip.is_file()
+        crate_dir = tmpdir / f"{repo_name}-crate"
+        shutil.unpack_archive(crate_zip, crate_dir)
+    else:
+        crate_dir = root
     crate = ROCrate(crate_dir)
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
