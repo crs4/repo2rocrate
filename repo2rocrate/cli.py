@@ -30,7 +30,7 @@ DEFAULT_LANG = "snakemake"
 @click.command()
 @click.option("-r", "--root", type=click.Path(exists=True, file_okay=False, readable=True, path_type=Path), help="workflow repository root", default=Path.cwd)
 @click.option('-l', '--lang', type=click.Choice(list(GEN_MAP)), default=DEFAULT_LANG, help="workflow language")
-@click.option("-o", "--output", type=click.Path(path_type=Path), help="output directory or zip file")
+@click.option("-o", "--output", type=click.Path(path_type=Path), help="output directory or zip file. The default is the repository root itself, in which case only the metadata file is written")
 @click.option("--repo-url", help="workflow repository URL")
 @click.option("--version", help="workflow version")
 @click.option("--lang-version", help="workflow language version")
@@ -38,12 +38,17 @@ DEFAULT_LANG = "snakemake"
 @click.option("--ci-workflow", help="filename (basename) of the GitHub Actions workflow that runs the tests for the workflow")
 @click.option("--diagram", help="relative path of the workflow diagram")
 def cli(root, lang, output, repo_url, version, lang_version, license, ci_workflow, diagram):
-    if not output:
-        output = Path(f"{root.name}.crate.zip")
-    print(f"generating {output}")
     make_crate = GEN_MAP[lang]
     crate = make_crate(root, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
-    if output.suffix == ".zip":
+    if not output:
+        output = root
+    try:
+        in_place = output.samefile(root)
+    except OSError:
+        in_place = False
+    if in_place:
+        crate.metadata.write(output)
+    elif output.suffix == ".zip":
         crate.write_zip(output)
     else:
         crate.write(output)
