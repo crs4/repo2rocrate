@@ -39,7 +39,7 @@ class CrateBuilder(metaclass=ABCMeta):
 
     def build(self, wf_source, version=None, lang_version=None, license=None, ci_workflow=None, diagram=None):
         workflow = self.add_workflow(wf_source, version=version, lang_version=lang_version, license=license, diagram=diagram)
-        self.add_test_suite(workflow, ci_workflow=ci_workflow)
+        self.add_test_suite(workflow=workflow, ci_workflow=ci_workflow)
         self.add_data_entities()
         return self.crate
 
@@ -68,19 +68,21 @@ class CrateBuilder(metaclass=ABCMeta):
                 workflow["image"] = diag
         return workflow
 
-    def add_test_suite(self, workflow, ci_workflow=None):
+    def add_test_suite(self, workflow=None, ci_workflow=None):
         if not self.repo_url:
             return None
         if not ci_workflow:
             ci_workflow = self.CI_WORKFLOW
         ci_wf_source = self.root / ".github" / "workflows" / ci_workflow
-        if ci_wf_source.is_file():
-            suite = self.crate.add_test_suite(name=f"{self.root.name} test suite")
-            resource = get_ci_wf_endpoint(self.repo_url, ci_workflow)
-            self.crate.add_test_instance(
-                suite, GH_API_URL, resource=resource, service="github",
-                name=f"GitHub testing workflow for {self.root.name}"
-            )
+        if not ci_wf_source.is_file():
+            return None
+        wf_name = workflow["name"] if workflow else self.crate.mainEntity["name"]
+        suite = self.crate.add_test_suite(name=f"Test suite for {wf_name}", main_entity=workflow)
+        resource = get_ci_wf_endpoint(self.repo_url, ci_workflow)
+        self.crate.add_test_instance(
+            suite, GH_API_URL, resource=resource, service="github",
+            name=f"GitHub Actions workflow for testing {wf_name}"
+        )
         return suite
 
     def add_data_entities(self, data_entities=None):

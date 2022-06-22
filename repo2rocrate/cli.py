@@ -15,10 +15,12 @@
 from pathlib import Path
 
 import click
+from .galaxy import make_crate as galaxy_make_crate
 from .nextflow import make_crate as nextflow_make_crate
 from .snakemake import make_crate as snakemake_make_crate
 
 GEN_MAP = {
+    "galaxy": galaxy_make_crate,
     "nextflow": nextflow_make_crate,
     "snakemake": snakemake_make_crate,
 }
