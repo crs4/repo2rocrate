@@ -35,9 +35,7 @@ def find_workflow(root_dir):
     for p in candidates:
         if p.is_file():
             return p
-    raise RuntimeError(
-        f"workflow definition (one of: {', '.join(candidates)}) not found"
-    )
+    raise RuntimeError(f"workflow definition (one of: {', '.join(map(str, candidates))}) not found")
 
 
 def parse_workflow(workflow_path):

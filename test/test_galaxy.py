@@ -12,11 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from repo2rocrate.galaxy import make_crate
+import pytest
+from repo2rocrate.galaxy import find_workflow, make_crate
 
 
 GALAXY_ID = "https://w3id.org/workflowhub/workflow-ro-crate#galaxy"
 PLANEMO_ID = "https://w3id.org/ro/terms/test#PlanemoEngine"
+
+
+@pytest.mark.filterwarnings("ignore")
+def test_find_workflow(tmpdir):
+    root = tmpdir / "galaxy-repo"
+    root.mkdir()
+    with pytest.raises(RuntimeError):
+        find_workflow(root)
+    wf_path = root / "foo.ga"
+    with open(wf_path, "wt"):
+        pass
+    assert find_workflow(root) == wf_path
+    new_wf_path = root / "main.ga"
+    with open(new_wf_path, "wt"):
+        pass
+    assert find_workflow(root) == new_wf_path
 
 
 def test_parallel_accession_download(data_dir):
