@@ -70,6 +70,7 @@ def test_default(data_dir, tmpdir, monkeypatch, to_zip):
 def test_options(data_dir, tmpdir):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
+    wf_path = root / "pyproject.toml"
     crate_dir = tmpdir / f"{repo_name}-crate"
     repo_url = f"https://github.com/crs4/{repo_name}"
     version = "3.14"
@@ -81,6 +82,7 @@ def test_options(data_dir, tmpdir):
     result = runner.invoke(cli, [
         "-r", str(root),
         "-l", "snakemake",
+        "-w", str(wf_path),
         "-o", str(crate_dir),
         "--repo-url", f"https://github.com/crs4/{repo_name}",
         "--version", version,
@@ -93,6 +95,7 @@ def test_options(data_dir, tmpdir):
     assert crate_dir.is_dir()
     crate = ROCrate(crate_dir)
     workflow = crate.mainEntity
+    assert workflow.id == wf_path.name
     assert workflow["name"] == repo_name
     assert workflow["version"] == version
     image = crate.get(diagram)
