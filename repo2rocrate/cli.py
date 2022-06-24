@@ -15,21 +15,13 @@
 from pathlib import Path
 
 import click
-from .galaxy import make_crate as galaxy_make_crate
-from .nextflow import make_crate as nextflow_make_crate
-from .snakemake import make_crate as snakemake_make_crate
-
-GEN_MAP = {
-    "galaxy": galaxy_make_crate,
-    "nextflow": nextflow_make_crate,
-    "snakemake": snakemake_make_crate,
-}
-DEFAULT_LANG = "snakemake"
+from . import find_workflow, LANG_MODULES
 
 
 @click.command()
 @click.option("-r", "--root", type=click.Path(exists=True, file_okay=False, readable=True, path_type=Path), help="workflow repository root", default=Path.cwd)
-@click.option('-l', '--lang', type=click.Choice(list(GEN_MAP)), default=DEFAULT_LANG, help="workflow language")
+@click.option('-l', '--lang', type=click.Choice(list(LANG_MODULES)), help="workflow language (default: auto-detect)")
+@click.option('-w', '--workflow', type=click.Path(path_type=Path), help="workflow file (default: auto-detect)")
 @click.option("-o", "--output", type=click.Path(path_type=Path), help="output directory or zip file. The default is the repository root itself, in which case only the metadata file is written")
 @click.option("--repo-url", help="workflow repository URL")
 @click.option("--version", help="workflow version")
@@ -37,9 +29,14 @@ DEFAULT_LANG = "snakemake"
 @click.option("--license", help="license URL")
 @click.option("--ci-workflow", help="filename (basename) of the GitHub Actions workflow that runs the tests for the workflow")
 @click.option("--diagram", help="relative path of the workflow diagram")
-def cli(root, lang, output, repo_url, version, lang_version, license, ci_workflow, diagram):
-    make_crate = GEN_MAP[lang]
-    crate = make_crate(root, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+def cli(root, lang, workflow, output, repo_url, version, lang_version, license, ci_workflow, diagram):
+    auto_workflow = None
+    if not lang:
+        lang, auto_workflow = find_workflow(root)
+    if not workflow:
+        workflow = auto_workflow
+    make_crate = LANG_MODULES[lang].make_crate
+    crate = make_crate(root, workflow=workflow, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
     if not output:
         output = root
     try:

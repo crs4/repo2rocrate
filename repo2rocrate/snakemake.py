@@ -35,9 +35,7 @@ def find_workflow(root_dir):
     for p in candidates:
         if p.is_file():
             return p
-    raise RuntimeError(
-        f"workflow definition (one of: {', '.join(candidates)}) not found"
-    )
+    raise RuntimeError(f"workflow definition (one of: {', '.join(map(str, candidates))}) not found")
 
 
 def parse_workflow(workflow_path):
@@ -76,8 +74,9 @@ class SnakemakeCrateBuilder(CrateBuilder):
         return "snakemake"
 
 
-def make_crate(root, repo_url=None, version=None, lang_version=None,
+def make_crate(root, workflow=None, repo_url=None, version=None, lang_version=None,
                license=None, ci_workflow=None, diagram=None):
     builder = SnakemakeCrateBuilder(root, repo_url=repo_url)
-    wf_source = find_workflow(root)
-    return builder.build(wf_source, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    if not workflow:
+        workflow = find_workflow(root)
+    return builder.build(workflow, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)

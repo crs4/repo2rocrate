@@ -12,10 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from repo2rocrate.snakemake import make_crate
+import shutil
+
+import pytest
+from repo2rocrate.snakemake import find_workflow, make_crate
 
 
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
+
+
+def test_find_workflow(tmpdir):
+    root = tmpdir / "snakemake-repo"
+    workflow_dir = root / "workflow"
+    workflow_dir.mkdir(parents=True)
+    with pytest.raises(RuntimeError):
+        find_workflow(root)
+    wf_path = workflow_dir / "Snakefile"
+    wf_path.touch()
+    assert find_workflow(root) == wf_path
+    new_wf_path = root / "Snakefile"
+    shutil.move(wf_path, new_wf_path)
+    assert find_workflow(root) == new_wf_path
 
 
 def test_fair_crcc_send_data(data_dir):
