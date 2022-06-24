@@ -28,8 +28,7 @@ def test_find_workflow(tmpdir):
     with pytest.raises(RuntimeError):
         find_workflow(root)
     wf_path = workflow_dir / "Snakefile"
-    with open(wf_path, "wt"):
-        pass
+    wf_path.touch()
     assert find_workflow(root) == wf_path
     new_wf_path = root / "Snakefile"
     shutil.move(wf_path, new_wf_path)

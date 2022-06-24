@@ -27,12 +27,10 @@ def test_find_workflow(tmpdir):
     with pytest.raises(RuntimeError):
         find_workflow(root)
     wf_path = root / "foo.ga"
-    with open(wf_path, "wt"):
-        pass
+    wf_path.touch()
     assert find_workflow(root) == wf_path
     new_wf_path = root / "main.ga"
-    with open(new_wf_path, "wt"):
-        pass
+    new_wf_path.touch()
     assert find_workflow(root) == new_wf_path
 
 

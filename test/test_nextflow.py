@@ -21,12 +21,11 @@ NEXTFLOW_ID = "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
 
 def test_find_workflow(tmpdir):
     root = tmpdir / "nextflow-repo"
+    root.mkdir()
     with pytest.raises(RuntimeError):
         find_workflow(root)
-    root.mkdir()
     wf_path = root / "main.nf"
-    with open(wf_path, "wt"):
-        pass
+    wf_path.touch()
     assert find_workflow(root) == wf_path
 
 
