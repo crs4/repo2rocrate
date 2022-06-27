@@ -74,9 +74,9 @@ class SnakemakeCrateBuilder(CrateBuilder):
         return "snakemake"
 
 
-def make_crate(root, workflow=None, repo_url=None, version=None, lang_version=None,
+def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
                license=None, ci_workflow=None, diagram=None):
     builder = SnakemakeCrateBuilder(root, repo_url=repo_url)
     if not workflow:
         workflow = find_workflow(root)
-    return builder.build(workflow, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    return builder.build(workflow, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)

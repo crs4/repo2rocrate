@@ -15,10 +15,10 @@
 import shutil
 
 import pytest
+import repo2rocrate
 from click.testing import CliRunner
-from repo2rocrate.cli import cli
 from rocrate.rocrate import ROCrate
-
+from repo2rocrate.cli import cli
 
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
 
@@ -73,7 +73,7 @@ def test_options(data_dir, tmpdir):
     wf_path = root / "pyproject.toml"
     crate_dir = tmpdir / f"{repo_name}-crate"
     repo_url = f"https://github.com/crs4/{repo_name}"
-    version = "3.14"
+    wf_version = "3.14"
     lang_version = "9.9.0"
     license = "http://example.org/license"
     ci_workflow = "conventional-prs.yml"
@@ -85,7 +85,7 @@ def test_options(data_dir, tmpdir):
         "-w", str(wf_path),
         "-o", str(crate_dir),
         "--repo-url", f"https://github.com/crs4/{repo_name}",
-        "--version", version,
+        "--wf-version", wf_version,
         "--lang-version", lang_version,
         "--license", license,
         "--ci-workflow", ci_workflow,
@@ -97,7 +97,7 @@ def test_options(data_dir, tmpdir):
     workflow = crate.mainEntity
     assert workflow.id == wf_path.name
     assert workflow["name"] == repo_name
-    assert workflow["version"] == version
+    assert workflow["version"] == wf_version
     image = crate.get(diagram)
     assert image
     assert set(image.type) == {"File", "ImageObject"}
@@ -108,3 +108,10 @@ def test_options(data_dir, tmpdir):
     assert workflow["url"] == crate.root_dataset["isBasedOn"] == repo_url
     instance = [_ for _ in crate.get_entities() if _.type == "TestInstance"][0]
     assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
+
+
+def test_version():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--version"])
+    assert result.exit_code == 0
+    assert result.output.strip() == repo2rocrate.__version__

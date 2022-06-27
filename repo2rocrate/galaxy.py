@@ -103,8 +103,8 @@ class GalaxyCrateBuilder(CrateBuilder):
             creator = self.crate.add(Entity(self.crate, identifier=id_, properties=properties))
             workflow.append_to("creator", creator)
 
-    def add_workflow(self, wf_source, version=None, lang_version=None, license=None, diagram=None):
-        workflow = super().add_workflow(wf_source, version=version, lang_version=lang_version, license=license, diagram=diagram)
+    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
         with open(wf_source) as f:
             wf_code = json.load(f)
         if "release" in wf_code:
@@ -126,9 +126,9 @@ class GalaxyCrateBuilder(CrateBuilder):
         return suite
 
 
-def make_crate(root, workflow=None, repo_url=None, version=None, lang_version=None,
+def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
                license=None, ci_workflow=None, diagram=None):
     builder = GalaxyCrateBuilder(root, repo_url=repo_url)
     if not workflow:
         workflow = find_workflow(root)
-    return builder.build(workflow, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    return builder.build(workflow, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
