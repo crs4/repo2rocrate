@@ -15,10 +15,10 @@
 import shutil
 
 import pytest
+import repo2rocrate
 from click.testing import CliRunner
-from repo2rocrate.cli import cli
 from rocrate.rocrate import ROCrate
-
+from repo2rocrate.cli import cli
 
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
 
@@ -108,3 +108,10 @@ def test_options(data_dir, tmpdir):
     assert workflow["url"] == crate.root_dataset["isBasedOn"] == repo_url
     instance = [_ for _ in crate.get_entities() if _.type == "TestInstance"][0]
     assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
+
+
+def test_version():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--version"])
+    assert result.exit_code == 0
+    assert result.output.strip() == repo2rocrate.__version__

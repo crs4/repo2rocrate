@@ -15,7 +15,7 @@
 from pathlib import Path
 
 import click
-from . import find_workflow, LANG_MODULES
+from . import find_workflow, LANG_MODULES, __version__
 
 
 @click.command()
@@ -29,7 +29,11 @@ from . import find_workflow, LANG_MODULES
 @click.option("--license", help="license URL")
 @click.option("--ci-workflow", help="filename (basename) of the GitHub Actions workflow that runs the tests for the workflow")
 @click.option("--diagram", help="relative path of the workflow diagram")
-def cli(root, lang, workflow, output, repo_url, wf_version, lang_version, license, ci_workflow, diagram):
+@click.option("--version", help="print version and exit", is_flag=True)
+def cli(root, lang, workflow, output, repo_url, wf_version, lang_version, license, ci_workflow, diagram, version):
+    if version:
+        print(__version__)
+        return
     auto_workflow = None
     if not lang:
         lang, auto_workflow = find_workflow(root)
