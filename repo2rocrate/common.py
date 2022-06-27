@@ -37,13 +37,13 @@ class CrateBuilder(metaclass=ABCMeta):
     def lang(self):
         pass
 
-    def build(self, wf_source, version=None, lang_version=None, license=None, ci_workflow=None, diagram=None):
-        workflow = self.add_workflow(wf_source, version=version, lang_version=lang_version, license=license, diagram=diagram)
+    def build(self, wf_source, wf_version=None, lang_version=None, license=None, ci_workflow=None, diagram=None):
+        workflow = self.add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
         self.add_test_suite(workflow=workflow, ci_workflow=ci_workflow)
         self.add_data_entities()
         return self.crate
 
-    def add_workflow(self, wf_source, version=None, lang_version=None, license=None, diagram=None):
+    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
         if not diagram:
             diagram = self.DIAGRAM
         workflow = self.crate.add_workflow(
@@ -51,8 +51,8 @@ class CrateBuilder(metaclass=ABCMeta):
             lang=self.lang, lang_version=lang_version, gen_cwl=False
         )
         workflow["name"] = self.crate.root_dataset["name"] = self.root.name
-        if version:
-            workflow["version"] = version
+        if wf_version:
+            workflow["version"] = wf_version
         # Is there a Python equivalent of https://github.com/licensee/licensee?
         if license:
             self.crate.root_dataset["license"] = license

@@ -33,18 +33,18 @@ def test_nf_core_foobar(data_dir):
     repo_name = "nf-core-foobar"
     root = data_dir / repo_name
     repo_url = f"https://github.com/crs4/{repo_name}"
-    version = "0.1.0"
+    wf_version = "0.1.0"
     lang_version = "21.10.3"
     license = "MIT"
     ci_workflow = "ci.yml"
     diagram = "docs/images/nf-core-foobar_logo_light.png"
-    crate = make_crate(root, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
     assert workflow.id == "main.nf"
     assert workflow["name"] == repo_name
-    assert workflow["version"] == version
+    assert workflow["version"] == wf_version
     image = crate.get(diagram)
     assert image
     assert set(image.type) == {"File", "ImageObject"}

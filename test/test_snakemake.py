@@ -39,17 +39,17 @@ def test_fair_crcc_send_data(data_dir):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
     repo_url = f"https://github.com/crs4/{repo_name}"
-    version = "0.1"  # made up
+    wf_version = "0.1"  # made up
     lang_version = "6.5.0"
     license = "GPL-3.0"
     ci_workflow = "main.yml"
-    crate = make_crate(root, repo_url=repo_url, version=version, lang_version=lang_version, license=license, ci_workflow=ci_workflow)
+    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow)
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
     assert workflow["name"] == repo_name
-    assert workflow["version"] == version
+    assert workflow["version"] == wf_version
     image = crate.get("images/rulegraph.svg")
     assert image
     assert set(image.type) == {"File", "ImageObject"}
