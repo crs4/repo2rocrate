@@ -43,6 +43,9 @@ def test_default(data_dir, tmpdir, monkeypatch, to_zip):
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
     assert workflow["name"] == repo_name
+    language = workflow["programmingLanguage"]
+    assert language.id == SNAKEMAKE_ID
+    assert language["version"] == "6.5.0"
     image = crate.get("images/rulegraph.svg")
     assert image
     assert set(image.type) == {"File", "ImageObject"}

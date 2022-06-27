@@ -48,7 +48,7 @@ setup(
     ],
     packages=["repo2rocrate"],
     python_requires='>=3.6, <4',
-    install_requires=["click", "pyyaml", "rocrate", "snakemake"],
+    install_requires=["click", "pyyaml", "rocrate"],
     entry_points={
         "console_scripts": ["repo2rocrate=repo2rocrate.cli:cli"],
     },
