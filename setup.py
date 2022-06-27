@@ -12,15 +12,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import re
 from pathlib import Path
+
 from setuptools import setup
-from repo2rocrate.version import VERSION
 
 THIS_DIR = Path(__file__).absolute().parent
 
+
+# don't import version.py so pip can run setup before installing dependencies
+def get_version():
+    pattern = r'VERSION\s*=\s*"([^"]+)"'
+    module = THIS_DIR / "repo2rocrate" / "version.py"
+    code = module.read_text()
+    return re.search(pattern, code).groups()[0]
+
+
 setup(
     name="repo2rocrate",
-    version=VERSION,
+    version=get_version(),
     url="https://github.com/crs4/repo2rocrate",
     description="Generate RO-Crates from workflow repositories",
     long_description=(THIS_DIR / "README.md").read_text(),
@@ -38,7 +48,7 @@ setup(
     ],
     packages=["repo2rocrate"],
     python_requires='>=3.6, <4',
-    install_requires=["click", "pyyaml", "rocrate"],
+    install_requires=["click", "pyyaml", "rocrate", "snakemake"],
     entry_points={
         "console_scripts": ["repo2rocrate=repo2rocrate.cli:cli"],
     },
