@@ -22,10 +22,10 @@ THIS_DIR = Path(__file__).absolute().parent
 
 # don't import version.py so pip can run setup before installing dependencies
 def get_version():
-    pattern = r'VERSION\s*=\s*"([^"]+)"'
+    pattern = r'^VERSION\s*=\s*"([^"]+)"'
     module = THIS_DIR / "repo2rocrate" / "version.py"
     code = module.read_text()
-    return re.search(pattern, code).groups()[0]
+    return re.search(pattern, code, re.MULTILINE).groups()[0]
 
 
 setup(
