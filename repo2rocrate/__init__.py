@@ -12,12 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from importlib import import_module
 from .version import VERSION
+from . import nextflow, snakemake, galaxy
 
 __version__ = VERSION
-LANG_NAMES = ["nextflow", "snakemake", "galaxy"]
-LANG_MODULES = {_: import_module(f".{_}", __name__) for _ in LANG_NAMES}
+
+LANG_MODULES = {
+    "nextflow": nextflow,
+    "snakemake": snakemake,
+    "galaxy": galaxy,
+}
 
 
 def find_workflow(root_dir):
