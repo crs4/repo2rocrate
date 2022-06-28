@@ -44,24 +44,47 @@ def test_get_lang_version(tmpdir):
         assert get_lang_version(wf_path) == v
 
 
-def test_fair_crcc_send_data(data_dir):
+@pytest.mark.parametrize("defaults", [False, True])
+def test_make_crate(data_dir, defaults):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
     repo_url = f"https://github.com/crs4/{repo_name}"
-    wf_version = "0.1"  # made up
-    lang_version = "6.5.0"
-    license = "GPL-3.0"
-    ci_workflow = "main.yml"
-    crate = make_crate(
-        root, repo_url=repo_url, wf_version=wf_version, license=license, ci_workflow=ci_workflow
-    )
-    assert crate.root_dataset["license"] == license
+    kwargs = {"repo_url": repo_url}
+    if defaults:
+        wf_path = root / "workflow" / "Snakefile"
+        wf_name = repo_name
+        wf_version = None
+        lang_version = "6.5.0"
+        license = None
+        ci_workflow = "main.yml"
+        diagram = "images/rulegraph.svg"
+    else:
+        wf_path = root / "pyproject.toml"
+        wf_name = "spam/bar"
+        wf_version = "0.9.0"
+        lang_version = "99.9.9"
+        license = "GPL-3.0"
+        ci_workflow = "release-please.yml"
+        diagram = "images/rulegraph.dot"
+        kwargs.update(
+            workflow=wf_path,
+            wf_name=wf_name,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            ci_workflow=ci_workflow,
+            diagram=diagram,
+        )
+    crate = make_crate(root, **kwargs)
+    if license:
+        assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
-    assert workflow.id == "workflow/Snakefile"
-    assert workflow["name"] == repo_name
-    assert workflow["version"] == wf_version
-    image = crate.get("images/rulegraph.svg")
+    assert workflow.id == str(wf_path.relative_to(root))
+    assert workflow["name"] == crate.root_dataset["name"] == wf_name
+    if wf_version:
+        assert workflow["version"] == wf_version
+    image = crate.get(diagram)
     assert image
     assert set(image.type) == {"File", "ImageObject"}
     assert workflow["image"] is image

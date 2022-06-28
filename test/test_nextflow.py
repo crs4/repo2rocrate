@@ -41,36 +41,44 @@ def test_get_metadata(tmpdir, data_dir):
     assert metadata["nextflowVersion"] == "!>=21.10.3"
     assert metadata["version"] == "0.1.0"
     config_file_path = tmpdir / "nextflow.config"
+    # fmt: off
     config_file_path.write_text(
         "manifest{name='nf-core/foobar'\n"
         "version='0.1.0'}\n"
     )
+    # fmt: on
     metadata = get_metadata(config_file_path)
     assert metadata["name"] == "nf-core/foobar"
     assert metadata["version"] == "0.1.0"
 
 
 @pytest.mark.parametrize("defaults", [False, True])
-def test_nf_core_foobar(data_dir, defaults):
+def test_make_crate(data_dir, defaults):
     root = data_dir / REPO_NAME
     license = "MIT"
     kwargs = {"license": license}
     if defaults:
+        wf_path = root / "main.nf"
         repo_url = "https://github.com/nf-core/foobar"
+        wf_name = "nf-core/foobar"
         wf_version = "0.1.0"
         lang_version = "!>=21.10.3"
         ci_workflow = "ci.yml"
         diagram = None
         resource = f"repos/nf-core/foobar/actions/workflows/{ci_workflow}"
     else:
+        wf_path = root / "workflows" / "foobar.nf"
         repo_url = f"https://github.com/crs4/{REPO_NAME}"
+        wf_name = "spam"
         wf_version = "0.9.9"
         lang_version = "21.10.0"
         ci_workflow = "linting.yml"
         diagram = "docs/images/nf-core-foobar_logo_light.png"
         resource = f"repos/crs4/{REPO_NAME}/actions/workflows/{ci_workflow}"
         kwargs.update(
+            workflow=wf_path,
             repo_url=repo_url,
+            wf_name=wf_name,
             wf_version=wf_version,
             lang_version=lang_version,
             license=license,
@@ -81,8 +89,8 @@ def test_nf_core_foobar(data_dir, defaults):
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
-    assert workflow.id == "main.nf"
-    assert workflow["name"] == "nf-core/foobar"
+    assert workflow.id == str(wf_path.relative_to(root))
+    assert workflow["name"] == crate.root_dataset["name"] == wf_name
     assert workflow["version"] == wf_version
     assert workflow["creator"] == "Simone Leo"
     assert workflow["description"] == "the foobar pipeline"

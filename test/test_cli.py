@@ -42,7 +42,7 @@ def test_default(data_dir, tmpdir, monkeypatch, to_zip):
     crate = ROCrate(crate_dir)
     workflow = crate.mainEntity
     assert workflow.id == "workflow/Snakefile"
-    assert workflow["name"] == repo_name
+    assert workflow["name"] == crate.root_dataset["name"] == repo_name
     language = workflow["programmingLanguage"]
     assert language.id == SNAKEMAKE_ID
     assert language["version"] == "6.5.0"
@@ -76,30 +76,34 @@ def test_options(data_dir, tmpdir):
     wf_path = root / "pyproject.toml"
     crate_dir = tmpdir / f"{repo_name}-crate"
     repo_url = f"https://github.com/crs4/{repo_name}"
+    wf_name = "spam"
     wf_version = "3.14"
     lang_version = "9.9.0"
     license = "http://example.org/license"
     ci_workflow = "conventional-prs.yml"
     diagram = "images/rulegraph.dot"
     runner = CliRunner()
+    # fmt: off
     result = runner.invoke(cli, [
         "-r", str(root),
         "-l", "snakemake",
         "-w", str(wf_path),
         "-o", str(crate_dir),
         "--repo-url", f"https://github.com/crs4/{repo_name}",
+        "--wf-name", wf_name,
         "--wf-version", wf_version,
         "--lang-version", lang_version,
         "--license", license,
         "--ci-workflow", ci_workflow,
         "--diagram", diagram,
     ])
+    # fmt: on
     assert result.exit_code == 0
     assert crate_dir.is_dir()
     crate = ROCrate(crate_dir)
     workflow = crate.mainEntity
     assert workflow.id == wf_path.name
-    assert workflow["name"] == repo_name
+    assert workflow["name"] == crate.root_dataset["name"] == wf_name
     assert workflow["version"] == wf_version
     image = crate.get(diagram)
     assert image

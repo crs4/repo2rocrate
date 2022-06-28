@@ -92,21 +92,28 @@ class NextflowCrateBuilder(CrateBuilder):
         super().__init__(root, repo_url=repo_url)
 
     def add_workflow(
-        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+        self,
+        wf_source,
+        wf_name=None,
+        wf_version=None,
+        lang_version=None,
+        license=None,
+        diagram=None,
     ):
         if not wf_version:
             wf_version = self.metadata.get("version")
         if not lang_version:
             lang_version = self.metadata.get("nextflowVersion")
+        if not wf_name:
+            wf_name = self.metadata.get("name")
         workflow = super().add_workflow(
             wf_source,
+            wf_name=wf_name,
             wf_version=wf_version,
             lang_version=lang_version,
             license=license,
             diagram=diagram,
         )
-        if "name" in self.metadata:
-            workflow["name"] = self.metadata["name"]
         if "author" in self.metadata:
             workflow.setdefault("creator", self.metadata["author"])
         if "description" in self.metadata:
@@ -118,6 +125,7 @@ def make_crate(
     root,
     workflow=None,
     repo_url=None,
+    wf_name=None,
     wf_version=None,
     lang_version=None,
     license=None,
@@ -129,6 +137,7 @@ def make_crate(
         workflow = find_workflow(root)
     return builder.build(
         workflow,
+        wf_name=wf_name,
         wf_version=wf_version,
         lang_version=lang_version,
         license=license,
