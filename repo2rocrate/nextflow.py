@@ -91,12 +91,20 @@ class NextflowCrateBuilder(CrateBuilder):
             repo_url = self.metadata.get("homePage")
         super().__init__(root, repo_url=repo_url)
 
-    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+    def add_workflow(
+        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+    ):
         if not wf_version:
             wf_version = self.metadata.get("version")
         if not lang_version:
             lang_version = self.metadata.get("nextflowVersion")
-        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+        workflow = super().add_workflow(
+            wf_source,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            diagram=diagram,
+        )
         if "name" in self.metadata:
             workflow["name"] = self.metadata["name"]
         if "author" in self.metadata:
@@ -106,9 +114,24 @@ class NextflowCrateBuilder(CrateBuilder):
         return workflow
 
 
-def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
-               license=None, ci_workflow=None, diagram=None):
+def make_crate(
+    root,
+    workflow=None,
+    repo_url=None,
+    wf_version=None,
+    lang_version=None,
+    license=None,
+    ci_workflow=None,
+    diagram=None,
+):
     builder = NextflowCrateBuilder(root, repo_url=repo_url)
     if not workflow:
         workflow = find_workflow(root)
-    return builder.build(workflow, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    return builder.build(
+        workflow,
+        wf_version=wf_version,
+        lang_version=lang_version,
+        license=license,
+        ci_workflow=ci_workflow,
+        diagram=diagram,
+    )

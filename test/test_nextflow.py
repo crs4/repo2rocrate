@@ -69,7 +69,14 @@ def test_nf_core_foobar(data_dir, defaults):
         ci_workflow = "linting.yml"
         diagram = "docs/images/nf-core-foobar_logo_light.png"
         resource = f"repos/crs4/{REPO_NAME}/actions/workflows/{ci_workflow}"
-        kwargs.update(repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+        kwargs.update(
+            repo_url=repo_url,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            ci_workflow=ci_workflow,
+            diagram=diagram,
+        )
     crate = make_crate(root, **kwargs)
     assert crate.root_dataset["license"] == license
     # workflow

@@ -73,16 +73,39 @@ class SnakemakeCrateBuilder(CrateBuilder):
     def lang(self):
         return "snakemake"
 
-    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+    def add_workflow(
+        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+    ):
         if not lang_version:
             lang_version = get_lang_version(wf_source)
-        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+        workflow = super().add_workflow(
+            wf_source,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            diagram=diagram,
+        )
         return workflow
 
 
-def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
-               license=None, ci_workflow=None, diagram=None):
+def make_crate(
+    root,
+    workflow=None,
+    repo_url=None,
+    wf_version=None,
+    lang_version=None,
+    license=None,
+    ci_workflow=None,
+    diagram=None,
+):
     builder = SnakemakeCrateBuilder(root, repo_url=repo_url)
     if not workflow:
         workflow = find_workflow(root)
-    return builder.build(workflow, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    return builder.build(
+        workflow,
+        wf_version=wf_version,
+        lang_version=lang_version,
+        license=license,
+        ci_workflow=ci_workflow,
+        diagram=diagram,
+    )

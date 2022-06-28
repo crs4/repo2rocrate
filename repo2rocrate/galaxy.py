@@ -26,6 +26,7 @@ from pathlib import Path
 
 import yaml
 from rocrate.model.entity import Entity
+
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -39,8 +40,7 @@ PLANEMO_TEST_EXTENSIONS = [".yml", ".yaml", ".json"]
 
 
 def find_workflow(root_dir):
-    candidates = [_.name for _ in os.scandir(root_dir)
-                  if _.is_file() and _.name.endswith(".ga")]
+    candidates = [_.name for _ in os.scandir(root_dir) if _.is_file() and _.name.endswith(".ga")]
     if not candidates:
         raise RuntimeError("workflow (.ga file) not found")
     if len(candidates) > 1:
@@ -103,8 +103,16 @@ class GalaxyCrateBuilder(CrateBuilder):
             creator = self.crate.add(Entity(self.crate, identifier=id_, properties=properties))
             workflow.append_to("creator", creator)
 
-    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
-        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+    def add_workflow(
+        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+    ):
+        workflow = super().add_workflow(
+            wf_source,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            diagram=diagram,
+        )
         with open(wf_source) as f:
             wf_code = json.load(f)
         if "release" in wf_code:
@@ -122,13 +130,30 @@ class GalaxyCrateBuilder(CrateBuilder):
         if workflow is None:
             workflow = suite["mainEntity"]
         def_path = find_test_definition(self.root, workflow.id)
-        self.crate.add_test_definition(suite, source=def_path, dest_path=def_path.relative_to(self.root), engine="planemo")
+        self.crate.add_test_definition(
+            suite, source=def_path, dest_path=def_path.relative_to(self.root), engine="planemo"
+        )
         return suite
 
 
-def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
-               license=None, ci_workflow=None, diagram=None):
+def make_crate(
+    root,
+    workflow=None,
+    repo_url=None,
+    wf_version=None,
+    lang_version=None,
+    license=None,
+    ci_workflow=None,
+    diagram=None,
+):
     builder = GalaxyCrateBuilder(root, repo_url=repo_url)
     if not workflow:
         workflow = find_workflow(root)
-    return builder.build(workflow, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    return builder.build(
+        workflow,
+        wf_version=wf_version,
+        lang_version=lang_version,
+        license=license,
+        ci_workflow=ci_workflow,
+        diagram=diagram,
+    )

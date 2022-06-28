@@ -40,7 +40,7 @@ def test_get_lang_version(tmpdir):
     wf_path = tmpdir / "Snakefile"
     for arg_part in f'("{v}")', f"( '{v}')":
         with open(wf_path, "wt") as f:
-            f.write(f'# comment\nfrom x import y\nmin_version{arg_part}\n')
+            f.write(f"# comment\nfrom x import y\nmin_version{arg_part}\n")
         assert get_lang_version(wf_path) == v
 
 
@@ -52,7 +52,9 @@ def test_fair_crcc_send_data(data_dir):
     lang_version = "6.5.0"
     license = "GPL-3.0"
     ci_workflow = "main.yml"
-    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, license=license, ci_workflow=ci_workflow)
+    crate = make_crate(
+        root, repo_url=repo_url, wf_version=wf_version, license=license, ci_workflow=ci_workflow
+    )
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity

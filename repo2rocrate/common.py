@@ -37,18 +37,38 @@ class CrateBuilder(metaclass=ABCMeta):
     def lang(self):
         pass
 
-    def build(self, wf_source, wf_version=None, lang_version=None, license=None, ci_workflow=None, diagram=None):
-        workflow = self.add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+    def build(
+        self,
+        wf_source,
+        wf_version=None,
+        lang_version=None,
+        license=None,
+        ci_workflow=None,
+        diagram=None,
+    ):
+        workflow = self.add_workflow(
+            wf_source,
+            wf_version=wf_version,
+            lang_version=lang_version,
+            license=license,
+            diagram=diagram,
+        )
         self.add_test_suite(workflow=workflow, ci_workflow=ci_workflow)
         self.add_data_entities()
         return self.crate
 
-    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+    def add_workflow(
+        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+    ):
         if not diagram:
             diagram = self.DIAGRAM
         workflow = self.crate.add_workflow(
-            wf_source, wf_source.relative_to(self.root), main=True,
-            lang=self.lang, lang_version=lang_version, gen_cwl=False
+            wf_source,
+            wf_source.relative_to(self.root),
+            main=True,
+            lang=self.lang,
+            lang_version=lang_version,
+            gen_cwl=False,
         )
         workflow["name"] = self.crate.root_dataset["name"] = self.root.name
         if wf_version:
@@ -61,10 +81,14 @@ class CrateBuilder(metaclass=ABCMeta):
         if diagram:
             diag_source = self.root / diagram
             if diag_source.is_file():
-                diag = self.crate.add_file(diag_source, diagram, properties={
-                    "name": "Workflow diagram",
-                    "@type": ["File", "ImageObject"],
-                })
+                diag = self.crate.add_file(
+                    diag_source,
+                    diagram,
+                    properties={
+                        "name": "Workflow diagram",
+                        "@type": ["File", "ImageObject"],
+                    },
+                )
                 workflow["image"] = diag
         return workflow
 
@@ -80,8 +104,11 @@ class CrateBuilder(metaclass=ABCMeta):
         suite = self.crate.add_test_suite(name=f"Test suite for {wf_name}", main_entity=workflow)
         resource = get_ci_wf_endpoint(self.repo_url, ci_workflow)
         self.crate.add_test_instance(
-            suite, GH_API_URL, resource=resource, service="github",
-            name=f"GitHub Actions workflow for testing {wf_name}"
+            suite,
+            GH_API_URL,
+            resource=resource,
+            service="github",
+            name=f"GitHub Actions workflow for testing {wf_name}",
         )
         return suite
 

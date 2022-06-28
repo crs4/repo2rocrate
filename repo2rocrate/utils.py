@@ -19,8 +19,6 @@ from urllib.parse import unquote, urlparse
 def get_ci_wf_endpoint(repo_url, ci_wf_name):
     repo_path = PurePosixPath(urlparse(unquote(repo_url)).path)
     if len(repo_path.parts) != 3:  # first one is '/'
-        raise ValueError(
-            "repository url must be like https://github.com/<OWNER>/<REPO>"
-        )
+        raise ValueError("repository url must be like https://github.com/<OWNER>/<REPO>")
     owner, repo_name = repo_path.parts[-2:]
     return f"repos/{owner}/{repo_name}/actions/workflows/{ci_wf_name}"

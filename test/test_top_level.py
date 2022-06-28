@@ -21,11 +21,7 @@ def test_find_workflow(tmpdir):
     root.mkdir()
     with pytest.raises(RuntimeError):
         find_workflow(root)
-    cases = [
-        ("nextflow", "main.nf"),
-        ("snakemake", "Snakefile"),
-        ("galaxy", "foo.ga")
-    ]
+    cases = [("nextflow", "main.nf"), ("snakemake", "Snakefile"), ("galaxy", "foo.ga")]
     for lang, wf_name in cases:
         wf_path = root / wf_name
         wf_path.touch()
