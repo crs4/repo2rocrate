@@ -39,7 +39,10 @@ from . import find_workflow, LANG_MODULES, __version__
     "-o",
     "--output",
     type=click.Path(path_type=Path),
-    help="output directory or zip file. The default is the repository root itself, in which case only the metadata file is written",
+    help=(
+        "output directory or zip file. The default is the repository root itself, in which case"
+        " only the metadata file is written"
+    ),
 )
 @click.option("--repo-url", help="workflow repository URL")
 @click.option("--wf-name", help="workflow name")
