@@ -53,7 +53,7 @@ def test_get_metadata(tmpdir, data_dir):
 
 
 @pytest.mark.parametrize("defaults", [False, True])
-def test_nf_core_foobar(data_dir, defaults):
+def test_make_crate(data_dir, defaults):
     root = data_dir / REPO_NAME
     license = "MIT"
     kwargs = {"license": license}

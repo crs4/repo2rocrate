@@ -35,7 +35,7 @@ def test_find_workflow(tmpdir):
 
 
 @pytest.mark.parametrize("defaults", [False, True])
-def test_parallel_accession_download(data_dir, defaults):
+def test_make_crate(data_dir, defaults):
     repo_name = "parallel-accession-download"
     root = data_dir / repo_name
     repo_url = f"https://github.com/iwc-workflows/{repo_name}"

@@ -45,7 +45,7 @@ def test_get_lang_version(tmpdir):
 
 
 @pytest.mark.parametrize("defaults", [False, True])
-def test_fair_crcc_send_data(data_dir, defaults):
+def test_make_crate(data_dir, defaults):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
     repo_url = f"https://github.com/crs4/{repo_name}"
