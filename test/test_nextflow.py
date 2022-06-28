@@ -77,6 +77,8 @@ def test_nf_core_foobar(data_dir, defaults):
     assert workflow.id == "main.nf"
     assert workflow["name"] == "nf-core/foobar"
     assert workflow["version"] == wf_version
+    assert workflow["creator"] == "Simone Leo"
+    assert workflow["description"] == "the foobar pipeline"
     if diagram:
         image = crate.get(diagram)
         assert image
