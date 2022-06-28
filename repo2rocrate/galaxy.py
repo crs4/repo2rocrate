@@ -123,7 +123,10 @@ class GalaxyCrateBuilder(CrateBuilder):
             diagram=diagram,
         )
         with open(wf_source) as f:
-            wf_code = json.load(f)
+            try:
+                wf_code = json.load(f)
+            except json.decoder.JSONDecodeError:
+                wf_code = {}
         if "release" in wf_code:
             workflow.setdefault("version", wf_code["release"])
         if "license" in wf_code:
@@ -136,9 +139,10 @@ class GalaxyCrateBuilder(CrateBuilder):
         if workflow is None:
             workflow = suite["mainEntity"]
         def_path = find_test_definition(self.root, workflow.id)
-        self.crate.add_test_definition(
-            suite, source=def_path, dest_path=def_path.relative_to(self.root), engine="planemo"
-        )
+        if def_path:
+            self.crate.add_test_definition(
+                suite, source=def_path, dest_path=def_path.relative_to(self.root), engine="planemo"
+            )
         return suite
 
 
