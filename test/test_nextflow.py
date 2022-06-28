@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import pytest
-from repo2rocrate.nextflow import find_workflow, make_crate
+from repo2rocrate.nextflow import find_workflow, get_metadata, make_crate
 
 
 NEXTFLOW_ID = "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
+REPO_NAME = "nf-core-foobar"
 
 
 def test_find_workflow(tmpdir):
@@ -29,26 +30,60 @@ def test_find_workflow(tmpdir):
     assert find_workflow(root) == wf_path
 
 
-def test_nf_core_foobar(data_dir):
-    repo_name = "nf-core-foobar"
-    root = data_dir / repo_name
-    repo_url = f"https://github.com/crs4/{repo_name}"
-    wf_version = "0.1.0"
-    lang_version = "21.10.3"
+def test_get_metadata(tmpdir, data_dir):
+    metadata = get_metadata(data_dir / REPO_NAME / "nextflow.config")
+    assert len(metadata) == 7
+    assert metadata["name"] == "nf-core/foobar"
+    assert metadata["author"] == "Simone Leo"
+    assert metadata["homePage"] == "https://github.com/nf-core/foobar"
+    assert metadata["description"] == "the foobar pipeline"
+    assert metadata["mainScript"] == "main.nf"
+    assert metadata["nextflowVersion"] == "!>=21.10.3"
+    assert metadata["version"] == "0.1.0"
+    config_file_path = tmpdir / "nextflow.config"
+    config_file_path.write_text(
+        "manifest{name='nf-core/foobar'\n"
+        "version='0.1.0'}\n"
+    )
+    metadata = get_metadata(config_file_path)
+    assert metadata["name"] == "nf-core/foobar"
+    assert metadata["version"] == "0.1.0"
+
+
+@pytest.mark.parametrize("defaults", [False, True])
+def test_nf_core_foobar(data_dir, defaults):
+    root = data_dir / REPO_NAME
     license = "MIT"
-    ci_workflow = "ci.yml"
-    diagram = "docs/images/nf-core-foobar_logo_light.png"
-    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    kwargs = {"license": license}
+    if defaults:
+        repo_url = "https://github.com/nf-core/foobar"
+        wf_version = "0.1.0"
+        lang_version = "!>=21.10.3"
+        ci_workflow = "ci.yml"
+        diagram = None
+        resource = f"repos/nf-core/foobar/actions/workflows/{ci_workflow}"
+    else:
+        repo_url = f"https://github.com/crs4/{REPO_NAME}"
+        wf_version = "0.9.9"
+        lang_version = "21.10.0"
+        ci_workflow = "linting.yml"
+        diagram = "docs/images/nf-core-foobar_logo_light.png"
+        resource = f"repos/crs4/{REPO_NAME}/actions/workflows/{ci_workflow}"
+        kwargs.update(repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow, diagram=diagram)
+    crate = make_crate(root, **kwargs)
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
     assert workflow.id == "main.nf"
-    assert workflow["name"] == repo_name
+    assert workflow["name"] == "nf-core/foobar"
     assert workflow["version"] == wf_version
-    image = crate.get(diagram)
-    assert image
-    assert set(image.type) == {"File", "ImageObject"}
-    assert workflow["image"] is image
+    assert workflow["creator"] == "Simone Leo"
+    assert workflow["description"] == "the foobar pipeline"
+    if diagram:
+        image = crate.get(diagram)
+        assert image
+        assert set(image.type) == {"File", "ImageObject"}
+        assert workflow["image"] is image
     language = workflow["programmingLanguage"]
     assert language.id == NEXTFLOW_ID
     assert language["version"] == lang_version
@@ -68,7 +103,7 @@ def test_nf_core_foobar(data_dir):
         instance = instance[0]
     assert instance.type == "TestInstance"
     assert instance["url"] == "https://api.github.com"
-    assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
+    assert instance["resource"] == resource
     # layout
     expected_data_entities = [
         ("nextflow.config", "File"),

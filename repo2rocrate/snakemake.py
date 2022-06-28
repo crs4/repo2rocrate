@@ -20,7 +20,8 @@ https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
 https://snakemake.github.io/snakemake-workflow-catalog/?rules=true
 """
 
-from snakemake.workflow import Workflow
+import re
+
 from .common import CrateBuilder
 
 
@@ -38,14 +39,13 @@ def find_workflow(root_dir):
     raise RuntimeError(f"workflow definition (one of: {', '.join(map(str, candidates))}) not found")
 
 
-def parse_workflow(workflow_path):
-    wf = Workflow(snakefile=workflow_path, overwrite_configfiles=[])
-    try:
-        wf.include(workflow_path)
-    except Exception:
-        pass
-    wf.execute(dryrun=True, updated_files=[])
-    return wf
+def get_lang_version(workflow_path):
+    pattern = re.compile(r"""min_version\(\s*['"]([^'"]+)['"]\s*\)""")
+    with open(workflow_path) as f:
+        for line in f:
+            m = pattern.match(line)
+            if m:
+                return m.groups()[0]
 
 
 class SnakemakeCrateBuilder(CrateBuilder):
@@ -72,6 +72,12 @@ class SnakemakeCrateBuilder(CrateBuilder):
     @property
     def lang(self):
         return "snakemake"
+
+    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+        if not lang_version:
+            lang_version = get_lang_version(wf_source)
+        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+        return workflow
 
 
 def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,

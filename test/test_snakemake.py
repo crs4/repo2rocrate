@@ -15,7 +15,7 @@
 import shutil
 
 import pytest
-from repo2rocrate.snakemake import find_workflow, make_crate
+from repo2rocrate.snakemake import find_workflow, get_lang_version, make_crate
 
 
 SNAKEMAKE_ID = "https://w3id.org/workflowhub/workflow-ro-crate#snakemake"
@@ -35,6 +35,15 @@ def test_find_workflow(tmpdir):
     assert find_workflow(root) == new_wf_path
 
 
+def test_get_lang_version(tmpdir):
+    v = "0.1.0"
+    wf_path = tmpdir / "Snakefile"
+    for arg_part in f'("{v}")', f"( '{v}')":
+        with open(wf_path, "wt") as f:
+            f.write(f'# comment\nfrom x import y\nmin_version{arg_part}\n')
+        assert get_lang_version(wf_path) == v
+
+
 def test_fair_crcc_send_data(data_dir):
     repo_name = "fair-crcc-send-data"
     root = data_dir / repo_name
@@ -43,7 +52,7 @@ def test_fair_crcc_send_data(data_dir):
     lang_version = "6.5.0"
     license = "GPL-3.0"
     ci_workflow = "main.yml"
-    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, lang_version=lang_version, license=license, ci_workflow=ci_workflow)
+    crate = make_crate(root, repo_url=repo_url, wf_version=wf_version, license=license, ci_workflow=ci_workflow)
     assert crate.root_dataset["license"] == license
     # workflow
     workflow = crate.mainEntity
