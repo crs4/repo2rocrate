@@ -41,10 +41,12 @@ def test_get_metadata(tmpdir, data_dir):
     assert metadata["nextflowVersion"] == "!>=21.10.3"
     assert metadata["version"] == "0.1.0"
     config_file_path = tmpdir / "nextflow.config"
+    # fmt: off
     config_file_path.write_text(
         "manifest{name='nf-core/foobar'\n"
         "version='0.1.0'}\n"
     )
+    # fmt: on
     metadata = get_metadata(config_file_path)
     assert metadata["name"] == "nf-core/foobar"
     assert metadata["version"] == "0.1.0"

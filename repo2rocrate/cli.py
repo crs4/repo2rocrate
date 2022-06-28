@@ -42,6 +42,7 @@ from . import find_workflow, LANG_MODULES, __version__
     help="output directory or zip file. The default is the repository root itself, in which case only the metadata file is written",
 )
 @click.option("--repo-url", help="workflow repository URL")
+@click.option("--wf-name", help="workflow name")
 @click.option("--wf-version", help="workflow version")
 @click.option("--lang-version", help="workflow language version")
 @click.option("--license", help="license URL")
@@ -57,6 +58,7 @@ def cli(
     workflow,
     output,
     repo_url,
+    wf_name,
     wf_version,
     lang_version,
     license,
@@ -77,6 +79,7 @@ def cli(
         root,
         workflow=workflow,
         repo_url=repo_url,
+        wf_name=wf_name,
         wf_version=wf_version,
         lang_version=lang_version,
         license=license,

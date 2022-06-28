@@ -104,10 +104,19 @@ class GalaxyCrateBuilder(CrateBuilder):
             workflow.append_to("creator", creator)
 
     def add_workflow(
-        self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None
+        self,
+        wf_source,
+        wf_name=None,
+        wf_version=None,
+        lang_version=None,
+        license=None,
+        diagram=None,
     ):
+        if not wf_name:
+            wf_name = get_workflow_name(self.root, wf_source.relative_to(self.root))
         workflow = super().add_workflow(
             wf_source,
+            wf_name=wf_name,
             wf_version=wf_version,
             lang_version=lang_version,
             license=license,
@@ -120,9 +129,6 @@ class GalaxyCrateBuilder(CrateBuilder):
         if "license" in wf_code:
             self.crate.root_dataset.setdefault("license", wf_code["license"])
         self.__add_creator(workflow, wf_code)
-        wf_name = get_workflow_name(self.root, Path(workflow.id))
-        if wf_name:
-            workflow["name"] = self.crate.root_dataset["name"] = wf_name
         return workflow
 
     def add_test_suite(self, workflow=None, ci_workflow=None):
@@ -140,6 +146,7 @@ def make_crate(
     root,
     workflow=None,
     repo_url=None,
+    wf_name=None,
     wf_version=None,
     lang_version=None,
     license=None,
@@ -151,6 +158,7 @@ def make_crate(
         workflow = find_workflow(root)
     return builder.build(
         workflow,
+        wf_name=wf_name,
         wf_version=wf_version,
         lang_version=lang_version,
         license=license,
