@@ -20,10 +20,12 @@ https://nf-co.re/contributing/guidelines
 https://nf-co.re/developers/adding_pipelines#nf-core-pipeline-structure
 """
 
+import re
 from .common import CrateBuilder
 
 
 WF_BASENAME = "main.nf"
+CONFIG_BASENAME = "nextflow.config"
 
 
 def find_workflow(root_dir):
@@ -31,6 +33,27 @@ def find_workflow(root_dir):
     if not wf_path.is_file():
         raise RuntimeError(f"{wf_path} not found")
     return wf_path
+
+
+def get_metadata(config_file_path):
+    metadata = {}
+    manifest_start = re.compile(r"manifest\s*{")
+    kv_entry = re.compile(r"""([a-zA-Z0-9]+)\s*=\s*["']([^"']+)["']""")
+    in_manifest = False
+    with open(config_file_path) as f:
+        for line in f:
+            line = line.strip()
+            if manifest_start.match(line):
+                in_manifest = True
+                line = line.split("{", 1)[-1]
+            if in_manifest:
+                match = kv_entry.match(line)
+                if match:
+                    k, v = match.groups()
+                    metadata[k] = v
+            if line.endswith("}"):
+                in_manifest = False
+    return metadata
 
 
 class NextflowCrateBuilder(CrateBuilder):
@@ -48,7 +71,7 @@ class NextflowCrateBuilder(CrateBuilder):
         ("modules/nf-core", "Dataset", "nf-core modules"),
         ("workflows", "Dataset", "Main pipeline workflows to be executed in main.nf"),
         ("subworkflows", "Dataset", "Smaller subworkflows"),
-        ("nextflow.config", "File", "Main Nextflow configuration file"),
+        (CONFIG_BASENAME, "File", "Main Nextflow configuration file"),
         ("README.md", "File", "Basic pipeline usage information"),
         ("nextflow_schema.json", "File", "JSON schema for pipeline parameter specification"),
         ("CHANGELOG.md", "File", "Information on changes made to the pipeline"),
@@ -61,6 +84,26 @@ class NextflowCrateBuilder(CrateBuilder):
     @property
     def lang(self):
         return "nextflow"
+
+    def __init__(self, root, repo_url=None):
+        self.metadata = get_metadata(root / CONFIG_BASENAME)
+        if not repo_url:
+            repo_url = self.metadata.get("homePage")
+        super().__init__(root, repo_url=repo_url)
+
+    def add_workflow(self, wf_source, wf_version=None, lang_version=None, license=None, diagram=None):
+        if not wf_version:
+            wf_version = self.metadata.get("version")
+        if not lang_version:
+            lang_version = self.metadata.get("nextflowVersion")
+        workflow = super().add_workflow(wf_source, wf_version=wf_version, lang_version=lang_version, license=license, diagram=diagram)
+        if "name" in self.metadata:
+            workflow["name"] = self.metadata["name"]
+        if "author" in self.metadata:
+            workflow.setdefault("creator", self.metadata["author"])
+        if "description" in self.metadata:
+            workflow.setdefault("description", self.metadata["description"])
+        return workflow
 
 
 def make_crate(root, workflow=None, repo_url=None, wf_version=None, lang_version=None,
