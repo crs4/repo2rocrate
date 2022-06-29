@@ -4,8 +4,6 @@ on:
   push:
     branches-ignore:
       - gh-pages
-    tags:
-      - '*'
   pull_request:
     branches-ignore:
       - gh-pages
@@ -36,9 +34,3 @@ jobs:
       run: |
         pip install pytest
         pytest -sv test
-    - name: Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
