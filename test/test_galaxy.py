@@ -114,12 +114,13 @@ def test_make_crate(data_dir, defaults):
         assert engine.type == "SoftwareApplication"
     # layout
     expected_data_entities = [
-        ("CHANGELOG.md", "File"),
-        ("README.md", "File"),
-        (".dockstore.yml", "File"),
-        ("test-data", "Dataset"),
+        ("CHANGELOG.md", "File", "History of changes made to the workflow"),
+        ("README.md", "File", "Workflow documentation"),
+        (".dockstore.yml", "File", "Dockstore metadata file"),
+        ("test-data", "Dataset", "Data files for testing the workflow"),
     ]
-    for relpath, type_ in expected_data_entities:
+    for relpath, type_, desc in expected_data_entities:
         entity = crate.get(relpath)
         assert entity, f"{relpath} not listed in crate metadata"
         assert entity.type == type_
+        assert entity["description"] == desc

@@ -110,15 +110,17 @@ def test_make_crate(data_dir, defaults):
     assert instance["resource"] == f"repos/crs4/{repo_name}/actions/workflows/{ci_workflow}"
     # layout
     expected_data_entities = [
-        ("LICENSE", "File"),
-        ("README.md", "File"),
-        ("config", "Dataset"),
-        (".tests/integration", "Dataset"),
-        ("workflow/rules", "Dataset"),
-        ("workflow/schemas", "Dataset"),
-        ("workflow/scripts", "Dataset"),
+        ("LICENSE", "File", ""),
+        ("README.md", "File", ""),
+        ("config", "Dataset", "Configuration folder"),
+        (".tests/integration", "Dataset", "Integration tests for the workflow"),
+        ("workflow/rules", "Dataset", "Workflow rule modules"),
+        ("workflow/schemas", "Dataset", "Validation files"),
+        ("workflow/scripts", "Dataset", "Scripts folder"),
     ]
-    for relpath, type_ in expected_data_entities:
+    for relpath, type_, desc in expected_data_entities:
         entity = crate.get(relpath)
         assert entity, f"{relpath} not listed in crate metadata"
         assert entity.type == type_
+        if desc:
+            assert entity["description"] == desc

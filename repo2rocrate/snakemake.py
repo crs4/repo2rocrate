@@ -57,7 +57,7 @@ class SnakemakeCrateBuilder(CrateBuilder):
         ("config", "Dataset", "Configuration folder"),
         ("results", "Dataset", "Output files"),
         ("resources", "Dataset", "Retrieved resources"),
-        ("workflow/rules", "Dataset", "Workflow rule module"),
+        ("workflow/rules", "Dataset", "Workflow rule modules"),
         ("workflow/envs", "Dataset", "Conda environments"),
         ("workflow/scripts", "Dataset", "Scripts folder"),
         ("workflow/notebooks", "Dataset", "Notebooks folder"),

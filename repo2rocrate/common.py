@@ -127,13 +127,12 @@ class CrateBuilder(metaclass=ABCMeta):
             if self.crate.get(str(relpath)):
                 continue  # existing entity is more specific
             source = self.root / relpath
+            properties = {"description": description} if description else None
             if type_ == "File":
                 if source.is_file():
-                    entity = self.crate.add_file(source, relpath)
+                    self.crate.add_file(source, relpath, properties=properties)
             elif type_ == "Dataset":
                 if source.is_dir():
-                    entity = self.crate.add_dataset(source, relpath)
+                    self.crate.add_dataset(source, relpath, properties=properties)
             else:
                 raise ValueError(f"Unexpected type: {type_!r}")
-            if description:
-                entity["description"] = str(description)

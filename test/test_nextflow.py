@@ -121,27 +121,28 @@ def test_make_crate(data_dir, defaults):
     assert instance["resource"] == resource
     # layout
     expected_data_entities = [
-        ("nextflow.config", "File"),
-        ("README.md", "File"),
-        ("nextflow_schema.json", "File"),
-        ("CHANGELOG.md", "File"),
-        ("LICENSE", "File"),
-        ("CODE_OF_CONDUCT.md", "File"),
-        ("CITATIONS.md", "File"),
-        ("modules.json", "File"),
-        ("assets", "Dataset"),
-        ("bin", "Dataset"),
-        ("conf", "Dataset"),
-        ("docs", "Dataset"),
-        ("docs/images", "Dataset"),
-        ("lib", "Dataset"),
-        ("modules", "Dataset"),
-        ("modules/local", "Dataset"),
-        ("modules/nf-core", "Dataset"),
-        ("workflows", "Dataset"),
-        ("subworkflows", "Dataset"),
+        ("nextflow.config", "File", "Main Nextflow configuration file"),
+        ("README.md", "File", "Basic pipeline usage information"),
+        ("nextflow_schema.json", "File", "JSON schema for pipeline parameter specification"),
+        ("CHANGELOG.md", "File", "Information on changes made to the pipeline"),
+        ("LICENSE", "File", "The license - should be MIT"),
+        ("CODE_OF_CONDUCT.md", "File", "The nf-core code of conduct"),
+        ("CITATIONS.md", "File", "Citations needed when using the pipeline"),
+        ("modules.json", "File", "Version information for modules from nf-core/modules"),
+        ("assets", "Dataset", "Additional files"),
+        ("bin", "Dataset", "Scripts that must be callable from a pipeline process"),
+        ("conf", "Dataset", "Configuration files"),
+        ("docs", "Dataset", "Markdown files for documenting the pipeline"),
+        ("docs/images", "Dataset", "Images for the documentation files"),
+        ("lib", "Dataset", "Groovy utility functions"),
+        ("modules", "Dataset", "Modules used by the pipeline"),
+        ("modules/local", "Dataset", "Pipeline-specific modules"),
+        ("modules/nf-core", "Dataset", "nf-core modules"),
+        ("workflows", "Dataset", "Main pipeline workflows to be executed in main.nf"),
+        ("subworkflows", "Dataset", "Smaller subworkflows"),
     ]
-    for relpath, type_ in expected_data_entities:
+    for relpath, type_, desc in expected_data_entities:
         entity = crate.get(relpath)
         assert entity, f"{relpath} not listed in crate metadata"
         assert entity.type == type_
+        assert entity["description"] == desc
