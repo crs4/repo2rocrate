@@ -113,10 +113,10 @@ def test_make_crate(data_dir, defaults):
         ("LICENSE", "File", ""),
         ("README.md", "File", ""),
         ("config", "Dataset", "Configuration folder"),
-        (".tests/integration", "Dataset", "Integration tests for the workflow"),
-        ("workflow/rules", "Dataset", "Workflow rule modules"),
+        (".tests/integration", ["Dataset", "SoftwareSourceCode"], "Integration tests for the workflow"),
+        ("workflow/rules", ["Dataset", "SoftwareSourceCode"], "Workflow rule modules"),
         ("workflow/schemas", "Dataset", "Validation files"),
-        ("workflow/scripts", "Dataset", "Scripts folder"),
+        ("workflow/scripts", ["Dataset", "SoftwareSourceCode"], "Scripts folder"),
     ]
     for relpath, type_, desc in expected_data_entities:
         entity = crate.get(relpath)

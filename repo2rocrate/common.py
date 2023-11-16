@@ -16,6 +16,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from rocrate.rocrate import ROCrate
+from rocrate.utils import as_list
 from .utils import get_ci_wf_endpoint
 
 GH_API_URL = "https://api.github.com"
@@ -127,11 +128,13 @@ class CrateBuilder(metaclass=ABCMeta):
             if self.crate.get(str(relpath)):
                 continue  # existing entity is more specific
             source = self.root / relpath
-            properties = {"description": description} if description else None
-            if type_ == "File":
+            properties = {"@type": type_}
+            if description:
+                properties["description"] = description
+            if "File" in as_list(type_):
                 if source.is_file():
                     self.crate.add_file(source, relpath, properties=properties)
-            elif type_ == "Dataset":
+            elif "Dataset" in as_list(type_):
                 if source.is_dir():
                     self.crate.add_dataset(source, relpath, properties=properties)
             else:

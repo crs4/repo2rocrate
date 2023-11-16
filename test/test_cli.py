@@ -54,10 +54,10 @@ def test_default(data_dir, tmpdir, monkeypatch, to_zip):
         ("LICENSE", "File"),
         ("README.md", "File"),
         ("config", "Dataset"),
-        (".tests/integration", "Dataset"),
-        ("workflow/rules", "Dataset"),
+        (".tests/integration", ["Dataset", "SoftwareSourceCode"]),
+        ("workflow/rules", ["Dataset", "SoftwareSourceCode"]),
         ("workflow/schemas", "Dataset"),
-        ("workflow/scripts", "Dataset"),
+        ("workflow/scripts", ["Dataset", "SoftwareSourceCode"]),
     ]
     for relpath, type_ in expected_data_entities:
         entity = crate.get(relpath)

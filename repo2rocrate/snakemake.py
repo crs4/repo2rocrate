@@ -51,16 +51,16 @@ def get_lang_version(workflow_path):
 class SnakemakeCrateBuilder(CrateBuilder):
 
     DATA_ENTITIES = [
-        (".tests/integration", "Dataset", "Integration tests for the workflow"),
-        (".tests/unit", "Dataset", "Unit tests for the workflow"),
-        ("workflow", "Dataset", "Workflow folder"),
+        (".tests/integration", ["Dataset", "SoftwareSourceCode"], "Integration tests for the workflow"),
+        (".tests/unit", ["Dataset", "SoftwareSourceCode"], "Unit tests for the workflow"),
+        ("workflow", ["Dataset", "SoftwareSourceCode"], "Workflow folder"),
         ("config", "Dataset", "Configuration folder"),
         ("results", "Dataset", "Output files"),
         ("resources", "Dataset", "Retrieved resources"),
-        ("workflow/rules", "Dataset", "Workflow rule modules"),
+        ("workflow/rules", ["Dataset", "SoftwareSourceCode"], "Workflow rule modules"),
         ("workflow/envs", "Dataset", "Conda environments"),
-        ("workflow/scripts", "Dataset", "Scripts folder"),
-        ("workflow/notebooks", "Dataset", "Notebooks folder"),
+        ("workflow/scripts", ["Dataset", "SoftwareSourceCode"], "Scripts folder"),
+        ("workflow/notebooks", ["Dataset", "SoftwareSourceCode"], "Notebooks folder"),
         ("workflow/report", "Dataset", "Report caption files"),
         ("workflow/schemas", "Dataset", "Validation files"),
     ]
