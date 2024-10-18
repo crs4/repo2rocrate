@@ -1,4 +1,4 @@
-# Copyright 2022 CRS4.
+# Copyright 2022-2024 CRS4.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -73,8 +73,8 @@ class NextflowCrateBuilder(CrateBuilder):
         ("modules/nf-core", "Dataset", "nf-core modules"),
         ("workflows", "Dataset", "Main pipeline workflows to be executed in main.nf"),
         ("subworkflows", "Dataset", "Subworkflows used by the pipeline"),
-        ("suborkflows/local", "Dataset", "Pipeline-specific suborkflows"),
-        ("suborkflows/nf-core", "Dataset", "nf-core suborkflows"),
+        ("subworkflows/local", "Dataset", "Pipeline-specific subworkflows"),
+        ("subworkflows/nf-core", "Dataset", "nf-core subworkflows"),
         (CONFIG_BASENAME, "File", "Main Nextflow configuration file"),
         ("README.md", "File", "Basic pipeline usage information"),
         ("nextflow_schema.json", "File", "JSON schema for pipeline parameter specification"),
