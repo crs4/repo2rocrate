@@ -35,8 +35,8 @@ setup(
     description="Generate RO-Crates from workflow repositories",
     long_description=(THIS_DIR / "README.md").read_text(),
     long_description_content_type="text/markdown",
-    author="Simone Leo",
-    author_email="<simone.leo@crs4.it>",
+    author="Simone Leo, Matthias Hörtenhuber",
+    author_email="<simone.leo@crs4.it>, <mashehu3@gmail.com>",
     license="Apache-2.0",
     platforms=["Linux"],
     classifiers=[
@@ -47,7 +47,7 @@ setup(
         "Intended Audience :: Science/Research",
     ],
     packages=["repo2rocrate"],
-    python_requires=">=3.6, <4",
+    python_requires=">=3.8, <4",
     install_requires=["click", "pyyaml", "rocrate"],
     entry_points={
         "console_scripts": ["repo2rocrate=repo2rocrate.cli:cli"],
