@@ -1,4 +1,5 @@
-# Copyright 2022 CRS4.
+# Copyright 2022-2024 CRS4.
+# Copyright 2024 Matthias Hörtenhuber
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -65,12 +66,16 @@ class NextflowCrateBuilder(CrateBuilder):
         ("conf", "Dataset", "Configuration files"),
         ("docs", "Dataset", "Markdown files for documenting the pipeline"),
         ("docs/images", "Dataset", "Images for the documentation files"),
+        ("docs/usage.md", "File", "Usage documentation"),
+        ("docs/output.md", "File", "Output documentation"),
         ("lib", "Dataset", "Groovy utility functions"),
         ("modules", "Dataset", "Modules used by the pipeline"),
         ("modules/local", "Dataset", "Pipeline-specific modules"),
         ("modules/nf-core", "Dataset", "nf-core modules"),
         ("workflows", "Dataset", "Main pipeline workflows to be executed in main.nf"),
-        ("subworkflows", "Dataset", "Smaller subworkflows"),
+        ("subworkflows", "Dataset", "Subworkflows used by the pipeline"),
+        ("subworkflows/local", "Dataset", "Pipeline-specific subworkflows"),
+        ("subworkflows/nf-core", "Dataset", "nf-core subworkflows"),
         (CONFIG_BASENAME, "File", "Main Nextflow configuration file"),
         ("README.md", "File", "Basic pipeline usage information"),
         ("nextflow_schema.json", "File", "JSON schema for pipeline parameter specification"),
@@ -79,6 +84,10 @@ class NextflowCrateBuilder(CrateBuilder):
         ("CODE_OF_CONDUCT.md", "File", "The nf-core code of conduct"),
         ("CITATIONS.md", "File", "Citations needed when using the pipeline"),
         ("modules.json", "File", "Version information for modules from nf-core/modules"),
+        ('.nf-core.yml', 'File', 'nf-core configuration file, configuring template features and linting rules'),
+        ('.pre-commit-config.yaml', 'File', 'Configuration file for pre-commit hooks'),
+        ('.prettierignore', 'File', 'Ignore file for prettier'),
+        ('.prettierrc', 'File', 'Configuration file for prettier'),
     ]
 
     @property

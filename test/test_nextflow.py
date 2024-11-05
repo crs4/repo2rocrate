@@ -139,7 +139,7 @@ def test_make_crate(data_dir, defaults):
         ("modules/local", "Dataset", "Pipeline-specific modules"),
         ("modules/nf-core", "Dataset", "nf-core modules"),
         ("workflows", "Dataset", "Main pipeline workflows to be executed in main.nf"),
-        ("subworkflows", "Dataset", "Smaller subworkflows"),
+        ("subworkflows", "Dataset", "Subworkflows used by the pipeline"),
     ]
     for relpath, type_, desc in expected_data_entities:
         entity = crate.get(relpath)
