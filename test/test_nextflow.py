@@ -103,6 +103,7 @@ def test_make_crate(data_dir, defaults):
     assert language.id == NEXTFLOW_ID
     assert language["version"] == lang_version
     assert workflow["url"] == crate.root_dataset["isBasedOn"] == repo_url
+    assert crate.root_dataset["version"] == wf_version
     # workflow testing metadata
     suite = crate.root_dataset["mentions"]
     assert suite
