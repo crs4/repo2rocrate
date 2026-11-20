@@ -82,6 +82,7 @@ class CrateBuilder(metaclass=ABCMeta):
         workflow["name"] = self.crate.root_dataset["name"] = wf_name or self.root.name
         if wf_version:
             workflow["version"] = wf_version
+            self.crate.root_dataset["version"] = wf_version
         # Is there a Python equivalent of https://github.com/licensee/licensee?
         if license:
             self.crate.root_dataset["license"] = license
