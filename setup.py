@@ -47,7 +47,7 @@ setup(
         "Intended Audience :: Science/Research",
     ],
     packages=["repo2rocrate"],
-    python_requires=">=3.9, <4",
+    python_requires=">=3.11, <4",
     install_requires=["click", "pyyaml", "rocrate"],
     entry_points={
         "console_scripts": ["repo2rocrate=repo2rocrate.cli:cli"],
